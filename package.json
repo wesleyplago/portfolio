@@ -1,0 +1,21 @@
+{
+  "name": "portfolio-monorepo",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.16.1",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n payops,portfolio -c magenta,cyan \"pnpm --filter @portfolio/payops dev\" \"pnpm --filter @portfolio/shell dev\"",
+    "build": "pnpm -r run build",
+    "preview": "concurrently -k -n payops,portfolio -c magenta,cyan \"pnpm --filter @portfolio/payops preview\" \"pnpm --filter @portfolio/shell preview\"",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "concurrently": "^9.2.1",
+    "typescript": "~5.9.3"
+  }
+}

@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.__mf__temp/
+*.log
+.DS_Store
+.env
+.env.local

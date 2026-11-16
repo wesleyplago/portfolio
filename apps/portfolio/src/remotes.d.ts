@@ -4,3 +4,9 @@ declare module 'payops/App' {
   const PayOpsApp: ComponentType;
   export default PayOpsApp;
 }
+
+declare module 'rag/App' {
+  import type { ComponentType } from 'react';
+  const RagApp: ComponentType;
+  export default RagApp;
+}

@@ -39,5 +39,6 @@ export const projects: Project[] = [
       'CI que falha se o recall cair mais de 2 pontos',
     ],
     repo: 'https://github.com/wesleyplago/rag-eval-harness',
+    demoPath: '/projetos/rag',
   },
 ];

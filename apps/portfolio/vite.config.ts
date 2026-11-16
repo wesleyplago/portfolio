@@ -2,11 +2,12 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { federation } from '@module-federation/vite';
 
-const PORT = 5180;
+const PORT = Number(process.env.PORTFOLIO_PORT ?? 5180);
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const payopsEntry = env.VITE_PAYOPS_REMOTE_URL ?? 'http://localhost:5181/remoteEntry.js';
+  const ragEntry = env.VITE_RAG_REMOTE_URL ?? 'http://localhost:5182/remoteEntry.js';
 
   return {
     plugins: [
@@ -16,6 +17,7 @@ export default defineConfig(({ mode }) => {
         // Cada remote é um app separado, com build e deploy próprios.
         remotes: {
           payops: { type: 'module', name: 'payops', entry: payopsEntry },
+          rag: { type: 'module', name: 'rag', entry: ragEntry },
         },
         shared: {
           react: { singleton: true, requiredVersion: '^19.0.0' },

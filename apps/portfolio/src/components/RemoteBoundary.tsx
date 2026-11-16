@@ -1,6 +1,12 @@
 import { Component, type ReactNode } from 'react';
 
-type Props = { name: string; children: ReactNode; onRetry?: () => void };
+type Props = {
+  name: string;
+  children: ReactNode;
+  onRetry?: () => void;
+  /** Onde o remote roda em dev, para a mensagem de ajuda. */
+  devUrl?: string;
+};
 type State = { error: Error | null };
 
 /**
@@ -20,8 +26,14 @@ export class RemoteBoundary extends Component<Props, State> {
       <div className="remote-error">
         <h3>Não foi possível carregar o microfrontend “{this.props.name}”.</h3>
         <p>
-          Ele roda como um app separado. Suba os dois com <code>pnpm dev</code> na raiz do monorepo (o PayOps fica em{' '}
-          <code>localhost:5181</code>) e recarregue.
+          Ele roda como um app separado. Suba os apps com <code>pnpm dev</code> na raiz do monorepo
+          {this.props.devUrl && (
+            <>
+              {' '}
+              (este fica em <code>{this.props.devUrl}</code>)
+            </>
+          )}{' '}
+          e recarregue.
         </p>
         <details>
           <summary>Detalhes</summary>

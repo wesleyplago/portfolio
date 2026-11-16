@@ -103,6 +103,45 @@ Coisas para testar: cobrar e repetir com a mesma chave (volta a mesma transaçã
 do que foi cobrado mesmo aprovando (o ledger bloqueia), Pix para `pix-atacante` (bloqueado antes
 de chegar ao humano), negar uma aprovação, e os cinco ataques da aba "Prompt injection".
 
+## A busca do RAG (rag-eval-harness)
+
+Rota `/projetos/rag`, remote `apps/rag` em `:5182`, contrato em `packages/rag-contracts`. Você faz
+perguntas sobre regulação de pagamentos e vê os trechos que o retrieval devolve, com documento, seção,
+score, latência e um histórico da sessão. A aba "Resultados do eval" mostra o snapshot publicado do
+benchmark (BM25 × dense × hybrid), que não depende da API.
+
+Para usar a API real, suba o rag-eval-harness (`docker compose up -d`, API em `API_PORT`, padrão 3000)
+e declare a URL em `apps/rag/.env.local` (modelo em `apps/rag/.env.example`):
+
+```bash
+echo 'VITE_RAG_API_URL=http://localhost:3001' > apps/rag/.env.local
+```
+
+**Desacoplamento:** o microfrontend funciona com o backend fora do ar.
+
+| Situação | O que acontece |
+| --- | --- |
+| `VITE_RAG_API_URL` não declarada | mock em memória desde a subida, com selo "modo demo" |
+| API declarada mas fora do ar (ou carregando o modelo) na subida | `/health` não responde em 2,5 s → mock |
+| API cai no meio da sessão | a busca mostra `NETWORK_ERROR` e oferece "Continuar em modo demo" |
+| Remote `:5182` fora do ar | só a área dele mostra erro (`RemoteBoundary`); o portfólio continua navegável e "Tentar de novo" recupera |
+| API muda o formato da resposta | Zod rejeita e a UI mostra `CONTRACT_MISMATCH` |
+
+O mock usa 15 trechos **reais** do corpus (mesmos ids de chunk), o mesmo router de identificadores
+(inclusive CNPJ alfanumérico) e abstenção, mas sem embeddings: os scores não são comparáveis com os da
+API, e a UI diz isso. A API precisa liberar CORS para as origens do portfólio (`CORS_ORIGINS` do
+rag-eval-harness; padrão 5180 e 5182).
+
+Testes de ponta a ponta (Playwright, contra o dev em 5180/5182; os testes que precisam da API se pulam
+sozinhos se ela estiver fora do ar):
+
+```bash
+pnpm --filter @portfolio/rag test:e2e
+```
+
+Cobrem navegação no portfólio, CSS isolado, busca semântica, CNPJ por busca exata, abstenção, top-k,
+validação, histórico, aba de resultados, layout no celular e os quatro cenários de desacoplamento.
+
 ## Decisões de microfrontend
 
 | Decisão | Por quê |

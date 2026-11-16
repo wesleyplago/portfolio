@@ -2,6 +2,7 @@ import { NavLink, Route, Routes } from 'react-router-dom';
 import { profile } from './content/profile';
 import { Home } from './pages/Home';
 import { PayOpsPage } from './pages/PayOpsPage';
+import { RagPage } from './pages/RagPage';
 import { NotFound } from './pages/NotFound';
 
 export default function App() {
@@ -15,6 +16,7 @@ export default function App() {
         <nav className="nav-links">
           <NavLink to="/" end>Início</NavLink>
           <NavLink to="/projetos/payops">PayOps ao vivo</NavLink>
+          <NavLink to="/projetos/rag">RAG ao vivo</NavLink>
           {profile.links.map((l) => (
             <a key={l.href} href={l.href} target="_blank" rel="noreferrer">
               {l.label} ↗
@@ -26,12 +28,13 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/projetos/payops" element={<PayOpsPage />} />
+          <Route path="/projetos/rag" element={<RagPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       <footer className="footer">
-        Portfólio em React + TypeScript. O PayOps é um microfrontend separado, carregado em runtime via Module
-        Federation.
+        Portfólio em React + TypeScript. O PayOps e o RAG são microfrontends separados, carregados em runtime via
+        Module Federation.
       </footer>
     </div>
   );

@@ -1,0 +1,19 @@
+{
+  "name": "@portfolio/e2e",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Testes de navegação e jornadas (Playwright) do portfólio + microfrontend do PayOps.",
+  "scripts": {
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui",
+    "e2e:report": "playwright show-report",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
+    "@playwright/test": "^1.65.1",
+    "@types/node": "^22",
+    "typescript": "~5.9.3"
+  }
+}

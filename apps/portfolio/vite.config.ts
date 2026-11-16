@@ -24,6 +24,14 @@ export default defineConfig(({ mode }) => {
           'react-dom': { singleton: true, requiredVersion: '^19.0.0' },
         },
         dts: false,
+        // Com o padrão (version-first), o build injeta <link rel="modulepreload">
+        // e faz import() de TODOS os remoteEntry na subida, em qualquer página:
+        // a home baixava PayOps e RAG sem precisar e, com um remote fora do ar,
+        // toda página registrava erros de rede. Com loaded-first, remotes
+        // carregados por rota (lazy) só são buscados quando a rota abre. Para
+        // React singleton, "o que o host já carregou vence" é o desejado.
+        // Coberto pelo E2E "páginas sem microfrontend não buscam nenhum remote".
+        shareStrategy: 'loaded-first',
       }),
     ],
     server: { port: PORT, strictPort: true, origin: `http://localhost:${PORT}` },

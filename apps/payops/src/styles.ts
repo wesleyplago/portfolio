@@ -12,6 +12,8 @@ export const css = `
   --po-text: #e6ebf5;
   --po-muted: #8b97ad;
   --po-accent: #4f8cff;
+  /* Fundo de botão com texto branco: #4f8cff dá só 3,2:1; este dá 5,2:1 (WCAG AA). */
+  --po-accent-strong: #2563eb;
   --po-ok: #2fbf71;
   --po-warn: #f0b429;
   --po-bad: #ef5b5b;
@@ -31,6 +33,8 @@ export const css = `
 .payops a { color: var(--po-accent); text-decoration: none; }
 .payops a:hover { text-decoration: underline; }
 .payops code, .payops .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+/* O host tem estilo global para <code>; o remote define o seu para não herdar cores de outro tema. */
+.payops code { background: var(--po-panel-2); color: var(--po-text); border: 1px solid var(--po-border); padding: 1px 5px; border-radius: 5px; }
 
 .payops .po-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
 .payops .po-brand { display: flex; align-items: center; gap: 10px; }
@@ -66,7 +70,7 @@ export const css = `
 .payops .po-btn { border: 1px solid var(--po-border); background: var(--po-panel-2); color: var(--po-text); padding: 9px 14px; border-radius: 8px; cursor: pointer; font: inherit; font-weight: 500; }
 .payops .po-btn:hover:not(:disabled) { border-color: var(--po-accent); }
 .payops .po-btn:disabled { opacity: .5; cursor: not-allowed; }
-.payops .po-btn.primary { background: var(--po-accent); border-color: var(--po-accent); color: white; }
+.payops .po-btn.primary { background: var(--po-accent-strong); border-color: var(--po-accent-strong); color: white; }
 .payops .po-btn.ok { background: var(--po-ok); border-color: var(--po-ok); color: #06210f; }
 .payops .po-btn.bad { background: transparent; border-color: var(--po-bad); color: var(--po-bad); }
 .payops .po-btn.small { padding: 4px 10px; font-size: 12px; }

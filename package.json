@@ -11,7 +11,8 @@
     "build": "pnpm -r run build",
     "preview": "concurrently -k -n payops,rag,portfolio -c magenta,green,cyan \"pnpm --filter @portfolio/payops preview\" \"pnpm --filter @portfolio/rag preview\" \"pnpm --filter @portfolio/shell preview\"",
     "typecheck": "pnpm -r typecheck",
-    "test": "pnpm -r test"
+    "test": "pnpm -r test",
+    "e2e": "pnpm --filter @portfolio/e2e e2e"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",

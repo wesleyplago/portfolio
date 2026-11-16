@@ -150,6 +150,8 @@ validação, histórico, aba de resultados, layout no celular e os quatro cenár
 | **React e React DOM como `singleton`** | duas cópias de React quebram hooks; host e remote compartilham uma |
 | **CSS isolado no remote** | tudo sob `.payops`, injetado pelo próprio componente; o host não carrega CSS do remote e nada vaza para o portfólio |
 | **`RemoteBoundary` + `Suspense`** | se o remote cair, só a área dele mostra erro; o resto do portfólio continua. "Tentar de novo" recria o `lazy` (o React guarda a falha) |
+| **`shareStrategy: 'loaded-first'` no host** | com o padrão, o build pré-carrega (`modulepreload` + `import()`) o `remoteEntry` de **todos** os remotes em **toda** página: a home baixava PayOps e RAG sem precisar e, com um remote fora do ar, qualquer página registrava erros. Agora cada remote só é buscado quando a rota dele abre |
+| **Estilos do remote não herdam os do host** | o host tem regras globais (ex.: `code`); o remote redefine o que usa sob `.payops`, porque o tema dele é outro |
 | **Contrato em pacote próprio** | `@portfolio/payops-contracts` valida toda resposta da API com Zod; se o backend mudar o formato, a UI mostra `CONTRACT_MISMATCH` em vez de quebrar silenciosamente |
 | **Regras de formulário espelhadas, não duplicadas como autoridade** | o Zod do front dá feedback imediato (teto de R$ 100 mil, `cus_xxx`, UUID); o backend continua decidindo. A allowlist de Pix fica **só** no servidor, de propósito |
 
@@ -174,6 +176,44 @@ O backend libera CORS só para as origens do `CORS_ORIGINS` (padrão: 5180/5181)
 | Fluxo em produção (`vite preview`) | remote desligado, depois ligado + "Tentar de novo"; cobrar → negar | fallback isolado; remote carrega no retry; `APPROVAL_DENIED` |
 | Seleção de modo | sem env; env + API no ar; env + API parada | mock ("não declarada"); real ("API real online"); mock ("fora do ar na subida") |
 | Fluxo no mock | cobrar → aprovar → repetir | mesma transação, saldo não duplica, sem links de trace |
+| Jornadas E2E | `pnpm e2e` (Playwright, build de produção) | 33/33, estável em execução repetida (66/66 com `--repeat-each=2`) |
+
+## Testes E2E (Playwright)
+
+```bash
+pnpm --filter @portfolio/e2e exec playwright install chromium   # uma vez
+pnpm e2e
+```
+
+A suíte em `e2e/` builda e serve o **build de produção** do host e dos remotes em portas próprias
+(5280/5281/5282, sem conflito com o `pnpm dev`), com PayOps e RAG em **modo mock**: determinística
+e sem backend. Também roda no CI, com o relatório anexado quando falha.
+
+Todo teste falha se a página registrar **qualquer erro de console ou exceção não tratada**, salvo
+no teste que derruba o remote de propósito.
+
+| Área | Jornadas |
+| --- | --- |
+| Navegação | home e projetos; menu com item ativo; CTA e card levam à demo; voltar/avançar; deep link; 404 com volta; rota do RAG monta outro remote; páginas sem microfrontend não buscam nenhum remote |
+| Cobrança | validação do formulário (valor, teto, `cus_xxx`) sem chamar o agente; espera o humano; aprovar lança no ledger; negar não move dinheiro; dois pedidos simultâneos |
+| Idempotência | repetir com a mesma chave devolve a mesma transação, sem nova aprovação nem nova cobrança |
+| Estorno | parcial passa; acima do capturado é bloqueado mesmo aprovado; ID inválido |
+| Pix | destino permitido passa pelo humano; fora da allowlist é barrado antes |
+| Consultas | saldos e faturas filtradas, sem aprovação |
+| Prompt injection | os 5 ataques: documento em quarentena e só a ação pedida |
+| Isolamento | remote fora do ar só afeta a área dele e "Tentar de novo" recupera; remote roda sozinho; estado do mock não vaza entre carregamentos |
+| Acessibilidade | axe (WCAG 2 A/AA) sem violações sérias na home e na demo, temas claro e escuro |
+| Mobile (Pixel 7) | sem rolagem horizontal; jornada de cobrança completa |
+
+Bugs que a suíte encontrou e foram corrigidos:
+
+1. **O host buscava todos os remotes em toda página** (11 requisições por remote, repetidas, com
+   erro de console se um estivesse fora do ar). Corrigido com `shareStrategy: 'loaded-first'`.
+2. **CSS do host vazando no remote:** o `code` global do portfólio pintava o banner do PayOps com
+   texto cinza sobre azul-claro (contraste insuficiente).
+3. **Contraste abaixo de WCAG AA:** o azul de destaque com texto branco (3,2:1 no PayOps; 2,9:1 nos
+   botões do portfólio no tema escuro; 4,25:1 no texto de destaque claro). Novos tokens de botão
+   com 5,2–5,9:1.
 
 ## Adicionando outro microfrontend
 

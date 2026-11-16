@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { federation } from '@module-federation/vite';
 
-const PORT = 5181;
+const PORT = Number(process.env.PAYOPS_PORT ?? 5181);
 
 export default defineConfig({
   plugins: [

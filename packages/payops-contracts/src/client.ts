@@ -44,10 +44,26 @@ async function parseJson<T>(response: Response, schema: z.ZodType<T>): Promise<T
   return parsed.data;
 }
 
-export function createPayOpsClient(config: PayOpsClientConfig) {
+export type ExecuteIntent = { tool: ToolName; arguments: Record<string, unknown>; idempotency_key?: string };
+
+/**
+ * Porta única do microfrontend para o payops-agent. Há duas implementações:
+ * HTTP real (createPayOpsClient) e em memória (createMockPayOpsClient).
+ */
+export interface PayOpsClient {
+  readonly mode: 'live' | 'mock';
+  ready(): Promise<boolean>;
+  /** Para mutações, a promise fica aberta até o humano decidir (ou o pedido expirar). */
+  execute(intent: ExecuteIntent, documents?: KbDocument[], message?: string): Promise<AgentResult>;
+  listApprovals(status?: string): Promise<Approval[]>;
+  decide(id: string, decision: 'approved' | 'denied', decidedBy?: string): Promise<void>;
+}
+
+export function createPayOpsClient(config: PayOpsClientConfig): PayOpsClient {
   const base = config.baseUrl.replace(/\/$/, '');
 
   return {
+    mode: 'live',
     async ready(): Promise<boolean> {
       try {
         return (await fetch(`${base}/readyz`)).ok;
@@ -58,7 +74,7 @@ export function createPayOpsClient(config: PayOpsClientConfig) {
 
     /** Pede ao agente. Para mutações, a chamada fica aberta até o humano decidir. */
     async execute(
-      intent: { tool: ToolName; arguments: Record<string, unknown>; idempotency_key?: string },
+      intent: ExecuteIntent,
       documents: KbDocument[] = [],
       message = `ui: ${intent.tool}`,
     ): Promise<AgentResult> {
@@ -87,5 +103,3 @@ export function createPayOpsClient(config: PayOpsClientConfig) {
     },
   };
 }
-
-export type PayOpsClient = ReturnType<typeof createPayOpsClient>;

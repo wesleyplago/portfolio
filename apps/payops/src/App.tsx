@@ -1,21 +1,52 @@
+import { useEffect, useState } from 'react';
 import { formatCents } from '@portfolio/payops-contracts';
 import { ActivityLog } from './components/ActivityLog';
 import { ApprovalInbox } from './components/ApprovalInbox';
 import { OperatorPanel } from './components/OperatorPanel';
 import { config } from './config';
+import { connect, type Connection } from './connect';
 import { css } from './styles';
 import { usePayOps } from './usePayOps';
 
 /**
  * Raiz do microfrontend. É o módulo exposto como `payops/App` via Module
  * Federation: o portfólio importa este componente e o renderiza numa rota.
+ *
+ * Na subida decide entre a API real e o mock em memória (ver connect.ts), então
+ * o microfrontend funciona mesmo sem backend.
  */
 export default function PayOpsApp() {
-  const api = usePayOps();
+  const [connection, setConnection] = useState<Connection | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    void connect().then((c) => alive && setConnection(c));
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   return (
     <div className="payops">
       <style>{css}</style>
+      {connection ? (
+        <Console connection={connection} />
+      ) : (
+        <div className="po-empty">
+          <span className="po-spinner" /> Procurando a API do payops-agent…
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Console({ connection }: { connection: Connection }) {
+  const api = usePayOps(connection.client);
+  const live = api.mode === 'live';
+  const jaeger = live ? config.jaegerUrl : undefined;
+
+  return (
+    <>
 
       <header className="po-top">
         <div className="po-brand">
@@ -26,20 +57,38 @@ export default function PayOpsApp() {
           </div>
         </div>
         <div className="po-status">
-          <span className={`po-pill ${api.online ? 'ok' : api.online === false ? 'bad' : ''}`}>
-            <span className="po-dot" />
-            {api.online === null ? 'verificando API…' : api.online ? 'API online' : 'API offline'}
-          </span>
-          <a className="po-pill" href={config.jaegerUrl} target="_blank" rel="noreferrer">
-            Jaeger ↗
-          </a>
+          {live ? (
+            <span className={`po-pill ${api.online ? 'ok' : api.online === false ? 'bad' : ''}`}>
+              <span className="po-dot" />
+              {api.online === null ? 'verificando API…' : api.online ? 'API real online' : 'API real offline'}
+            </span>
+          ) : (
+            <span className="po-pill warn">
+              <span className="po-dot" />
+              modo demo · dados simulados
+            </span>
+          )}
+          {jaeger && (
+            <a className="po-pill" href={jaeger} target="_blank" rel="noreferrer">
+              Jaeger ↗
+            </a>
+          )}
         </div>
       </header>
 
-      {api.online === false && (
+      {!live && (
+        <div className="po-banner info" style={{ marginBottom: 16 }}>
+          <b>Modo demo:</b> {connection.reason}. Estou usando um mock em memória com as mesmas regras do payops-agent
+          (aprovação humana, idempotência, limite de estorno, allowlist de Pix, quarentena de documentos). Nada sai do
+          navegador e o estado some ao recarregar. Para usar a API real, declare <code>VITE_PAYOPS_API_URL</code> e as
+          chaves (veja <code>apps/payops/.env.example</code>).
+        </div>
+      )}
+
+      {live && api.online === false && (
         <div className="po-banner bad" style={{ marginBottom: 16 }}>
-          Não consegui falar com <code>{config.apiUrl}</code>. Suba o backend com <code>docker compose up -d</code> na
-          pasta do payops-agent.
+          A API real <code>{config.apiUrl}</code> parou de responder. Suba o backend com{' '}
+          <code>docker compose up -d</code> na pasta do payops-agent, ou recarregue para usar o modo demo.
         </div>
       )}
 
@@ -85,6 +134,6 @@ export default function PayOpsApp() {
           </section>
         </div>
       </div>
-    </div>
+    </>
   );
 }

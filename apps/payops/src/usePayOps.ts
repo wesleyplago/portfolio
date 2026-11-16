@@ -1,17 +1,16 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   BalanceDataSchema,
   MUTATION_TOOLS,
   MutationDataSchema,
   PayOpsApiError,
-  createPayOpsClient,
   type AgentResult,
   type Approval,
   type BalanceData,
   type KbDocument,
+  type PayOpsClient,
   type ToolName,
 } from '@portfolio/payops-contracts';
-import { config } from './config';
 
 export type Intent = {
   tool: ToolName;
@@ -36,11 +35,7 @@ const isMutation = (tool: ToolName) => (MUTATION_TOOLS as readonly string[]).inc
 const errorText = (err: unknown) =>
   err instanceof PayOpsApiError ? `${err.code}: ${err.message}` : err instanceof Error ? err.message : String(err);
 
-export function usePayOps() {
-  const client = useMemo(
-    () => createPayOpsClient({ baseUrl: config.apiUrl, agentKey: config.agentKey, approverKey: config.approverKey }),
-    [],
-  );
+export function usePayOps(client: PayOpsClient) {
   const [online, setOnline] = useState<boolean | null>(null);
   const [activity, setActivity] = useState<ActivityEntry[]>([]);
   const [approvals, setApprovals] = useState<Approval[]>([]);
@@ -92,10 +87,11 @@ export function usePayOps() {
     };
     void check();
     void refreshBalance();
-    const t = setInterval(check, 5_000);
+    // O mock está sempre disponível; só a API real precisa de health check.
+    const t = client.mode === 'live' ? setInterval(check, 5_000) : undefined;
     return () => {
       alive = false;
-      clearInterval(t);
+      if (t) clearInterval(t);
     };
   }, [client, refreshBalance]);
 
@@ -128,7 +124,8 @@ export function usePayOps() {
 
         if (result.status === 'completed' && isMutation(finalIntent.tool)) {
           const data = MutationDataSchema.safeParse(result.data);
-          if (data.success && !data.data.replayed && mounted.current) {
+          const replayed = result.tool_calls.some((t) => t.replayed) || data.data?.replayed === true;
+          if (data.success && !replayed && mounted.current) {
             if (finalIntent.tool === 'create_charge') {
               setCharges((list) => [
                 {
@@ -174,5 +171,5 @@ export function usePayOps() {
 
   const waiting = activity.some((e) => e.state === 'waiting' && isMutation(e.intent.tool));
 
-  return { online, activity, approvals, approvalsError, balance, charges, run, decide, refreshBalance, waiting };
+  return { mode: client.mode, online, activity, approvals, approvalsError, balance, charges, run, decide, refreshBalance, waiting };
 }

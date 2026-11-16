@@ -24,8 +24,9 @@ export function PayOpsPage() {
         </a>
       </div>
       <div className="callout">
-        Você faz os dois papéis: pede operações ao agente (esquerda) e decide como o aprovador humano (direita). Requer o
-        backend do payops-agent rodando localmente com <code>docker compose up -d</code>.
+        Você faz os dois papéis: pede operações ao agente (esquerda) e decide como o aprovador humano (direita). Se a API
+        do payops-agent estiver configurada e no ar, o console usa ela; senão, roda com um mock em memória que segue o
+        mesmo contrato.
       </div>
       <RemoteBoundary name="payops" onRetry={() => setAttempt((n) => n + 1)}>
         <Suspense fallback={<div className="loading">Carregando o microfrontend do PayOps…</div>}>

@@ -118,7 +118,7 @@ function Entry({ entry, api }: { entry: ActivityEntry; api: Api }) {
           )}
           <ResultDetails result={r} />
           <div className="po-actions" style={{ alignItems: 'center' }}>
-            {r.trace_id && (
+            {r.trace_id && api.mode === 'live' && config.jaegerUrl && (
               <a href={`${config.jaegerUrl}/trace/${r.trace_id}`} target="_blank" rel="noreferrer" className="po-sub">
                 Ver trace no Jaeger ↗
               </a>

@@ -5,6 +5,7 @@ import { ApprovalInbox } from './components/ApprovalInbox';
 import { OperatorPanel } from './components/OperatorPanel';
 import { config } from './config';
 import { connect, type Connection } from './connect';
+import { fonts } from './fonts';
 import { css } from './styles';
 import { usePayOps } from './usePayOps';
 
@@ -28,7 +29,7 @@ export default function PayOpsApp() {
 
   return (
     <div className="payops">
-      <style>{css}</style>
+      <style>{fonts + css}</style>
       {connection ? (
         <Console connection={connection} />
       ) : (

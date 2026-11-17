@@ -20,7 +20,7 @@ export const css = `
   --po-radius: 12px;
   color: var(--po-text);
   background: var(--po-bg);
-  font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 14px/1.5 Chivo, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   border-radius: 16px;
   padding: 20px;
   box-sizing: border-box;
@@ -32,7 +32,7 @@ export const css = `
 .payops h4 { font-size: 13px; color: var(--po-muted); text-transform: uppercase; letter-spacing: .06em; }
 .payops a { color: var(--po-accent); text-decoration: none; }
 .payops a:hover { text-decoration: underline; }
-.payops code, .payops .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+.payops code, .payops .mono { font-family: "Chivo Mono", ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
 /* O host tem estilo global para <code>; o remote define o seu para não herdar cores de outro tema. */
 .payops code { background: var(--po-panel-2); color: var(--po-text); border: 1px solid var(--po-border); padding: 1px 5px; border-radius: 5px; }
 

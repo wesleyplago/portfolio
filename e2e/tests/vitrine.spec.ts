@@ -300,6 +300,16 @@ test.describe('qualidade da interface', () => {
   });
 });
 
+test('Vitrine usa a marca própria em bordô, e o backoffice é um painel de trabalho branco', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'dark' });
+  const v = new Vitrine(page);
+  await v.open();
+  await expect(v.root).toHaveCSS('background-color', 'rgb(226, 226, 226)');
+  await expect(v.cards.first().locator('.vt-price strong')).toHaveCSS('font-family', /Zilla Slab/);
+  await v.goTab('Backoffice');
+  await expect(v.root.locator('.vt-bo')).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+});
+
 test.describe('vitrine no celular @mobile', () => {
   test('sem rolagem horizontal na vitrine e no backoffice, e o cadastro funciona @mobile', async ({ page }) => {
     const v = new Vitrine(page);

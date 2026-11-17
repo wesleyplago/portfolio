@@ -3,6 +3,7 @@ import type { Session } from '@portfolio/vitrine-contracts';
 import { Backoffice } from './Backoffice';
 import { connect, type Connection } from './connect';
 import { Storefront } from './Storefront';
+import { fonts } from './fonts';
 import { css } from './styles';
 
 type View = 'vitrine' | 'backoffice';
@@ -27,7 +28,7 @@ export default function VitrineApp() {
 
   return (
     <div className="vt">
-      <style>{css}</style>
+      <style>{fonts + css}</style>
       <header className="vt-top">
         <div className="vt-tabs" role="tablist" aria-label="Visão">
           <button role="tab" aria-selected={view === 'vitrine'} onClick={() => setView('vitrine')}>

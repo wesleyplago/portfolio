@@ -1,0 +1,18 @@
+{
+  "name": "@portfolio/brands",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Tokens de marca (cores, tipografia, raios), contraste WCAG e geração de CSS para os micro-frontends.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

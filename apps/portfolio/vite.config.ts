@@ -8,6 +8,9 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const payopsEntry = env.VITE_PAYOPS_REMOTE_URL ?? 'http://localhost:5181/remoteEntry.js';
   const ragEntry = env.VITE_RAG_REMOTE_URL ?? 'http://localhost:5182/remoteEntry.js';
+  // Lagoski: um remote por bounded context com UI, cada um com build e deploy próprios.
+  const lagoski = (name: string, port: number) =>
+    env[`VITE_LAGOSKI_${name.toUpperCase()}_REMOTE_URL`] ?? `http://localhost:${port}/remoteEntry.js`;
 
   return {
     plugins: [
@@ -18,6 +21,10 @@ export default defineConfig(({ mode }) => {
         remotes: {
           payops: { type: 'module', name: 'payops', entry: payopsEntry },
           rag: { type: 'module', name: 'rag', entry: ragEntry },
+          lagoskiCatalog: { type: 'module', name: 'lagoskiCatalog', entry: lagoski('catalog', 5183) },
+          lagoskiCheckout: { type: 'module', name: 'lagoskiCheckout', entry: lagoski('checkout', 5184) },
+          lagoskiOrders: { type: 'module', name: 'lagoskiOrders', entry: lagoski('orders', 5185) },
+          lagoskiInspector: { type: 'module', name: 'lagoskiInspector', entry: lagoski('inspector', 5186) },
         },
         shared: {
           react: { singleton: true, requiredVersion: '^19.0.0' },

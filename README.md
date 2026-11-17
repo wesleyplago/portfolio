@@ -12,10 +12,17 @@ declarada, ou com a API fora do ar na subida, roda com um mock em memória que s
 ```text
 portfolio/                         monorepo pnpm
 ├── apps/
-│   ├── portfolio/   (host)        :5180  páginas do portfólio + rota /projetos/payops
-│   └── payops/      (remote)      :5181  expõe `payops/App` em remoteEntry.js; também roda sozinho
+│   ├── portfolio/   (host)        :5180  páginas do portfólio + rotas /projetos/*
+│   ├── payops/      (remote)      :5181  expõe `payops/App` em remoteEntry.js; também roda sozinho
+│   ├── rag/         (remote)      :5182  busca do rag-eval-harness
+│   ├── lagoski-catalog/   (remote) :5183  ┐
+│   ├── lagoski-checkout/  (remote) :5184  │ Lagoski: um microfrontend por
+│   ├── lagoski-orders/    (remote) :5185  │ bounded context com UI
+│   └── lagoski-inspector/ (remote) :5186  ┘
 └── packages/
-    └── payops-contracts/          schemas Zod, cliente HTTP e mock em memória (mesma interface)
+    ├── payops-contracts/          schemas Zod, cliente HTTP e mock em memória (mesma interface)
+    ├── rag-contracts/
+    └── lagoski-contracts/         API do BFF (Zod), cliente HTTP + SSE, sistema simulado, eventos entre MFEs
 ```
 
 ```text
@@ -142,6 +149,56 @@ pnpm --filter @portfolio/rag test:e2e
 Cobrem navegação no portfólio, CSS isolado, busca semântica, CNPJ por busca exata, abstenção, top-k,
 validação, histórico, aba de resultados, layout no celular e os quatro cenários de desacoplamento.
 
+## Lagoski (microsserviços orientados a eventos)
+
+Rota `/projetos/lagoski`. É o front de um sistema de **seis bounded contexts** em repositórios
+separados ([lagoski-platform](https://github.com/wesleyplago/lagoski-platform) tem a lista, a spec e
+os ADRs), integrados só por eventos na AWS (SNS + SQS) e no GCP (Pub/Sub). A página de arquitetura
+fica em [`apps/portfolio/public/lagoski/arquitetura.html`](apps/portfolio/public/lagoski/arquitetura.html)
+(servida em `/lagoski/arquitetura.html`).
+
+Diferente do PayOps e do RAG, o Lagoski não é um remote só: são **quatro**, um por contexto com UI,
+compostos pelo host na mesma página, cada um com build próprio e falha isolada.
+
+| Remote | Contexto dono | O que faz |
+| --- | --- | --- |
+| `lagoski-catalog` | Catalog (+ estoque do Inventory) | coleção, cor, tamanho, disponível |
+| `lagoski-checkout` | Ordering + Payment | carrinho, fechar pedido, pagamento no **Stripe Checkout** |
+| `lagoski-orders` | Ordering + Fulfillment + Notification | pedidos, rastreio, e-mails |
+| `lagoski-inspector` | plataforma | eventos do barramento ao vivo, filas por assinatura, cenários de falha |
+
+Os remotes **não se importam**: conversam por eventos no navegador (`lagoski:cart-changed`,
+`lagoski:order-placed`, `lagoski:focus-order`), como os serviços no backend. Como cada um é um bundle
+separado, a conexão e a sessão (cliente guest + carrinho) ficam num registro global da aba
+(`Symbol.for('lagoski.runtime')`): os quatro falam com o mesmo backend.
+
+**Modo real ou demo** (decidido uma vez por aba, como no PayOps):
+
+| Situação | O que acontece |
+| --- | --- |
+| `VITE_LAGOSKI_API_URL` não declarada | sistema simulado no navegador desde a subida |
+| BFF declarado, `/api/health` não responde | sistema simulado ("BFF … fora do ar na subida") |
+| BFF no ar | microsserviços de verdade; o Inspector recebe os eventos por **SSE**; o pagamento abre o **Stripe Checkout em modo de testes** e volta para a página |
+
+O sistema simulado (`packages/lagoski-contracts/src/mock`) não é um stub de respostas: são os seis
+serviços com as mesmas regras, **integrados só por um broker em memória** com tópicos, assinaturas com
+filtro por tipo, fila por consumidor, latência aleatória (eventos fora de ordem), retry com backoff,
+DLQ após 5 tentativas e inbox idempotente. O Inspector mostra os contadores de cada fila e tem os
+cenários: zerar estoque, derrubar e religar um consumidor, mensagem envenenada (→ DLQ → reprocessar),
+entrega duplicada e reserva vencida. O Stripe Checkout é simulado com os mesmos cartões de teste
+(`4242…` aprova, `4000 0000 0000 0002` é recusado).
+
+Para usar os serviços de verdade, suba o compose do `lagoski-platform` (inclui o `stripe listen`
+descrito lá) e declare o BFF nos quatro remotes:
+
+```bash
+for app in catalog checkout orders inspector; do cp apps/lagoski-$app/.env.example apps/lagoski-$app/.env.local; done
+```
+
+Verificado localmente nos dois modos: no real, compra paga no Stripe sandbox com o cartão 4242 volta
+para a página com o pedido confirmado, e o Inspector mostra a saga até `shipment.dispatched`; no demo,
+as jornadas E2E abaixo.
+
 ## Decisões de microfrontend
 
 | Decisão | Por quê |
@@ -176,7 +233,8 @@ O backend libera CORS só para as origens do `CORS_ORIGINS` (padrão: 5180/5181)
 | Fluxo em produção (`vite preview`) | remote desligado, depois ligado + "Tentar de novo"; cobrar → negar | fallback isolado; remote carrega no retry; `APPROVAL_DENIED` |
 | Seleção de modo | sem env; env + API no ar; env + API parada | mock ("não declarada"); real ("API real online"); mock ("fora do ar na subida") |
 | Fluxo no mock | cobrar → aprovar → repetir | mesma transação, saldo não duplica, sem links de trace |
-| Jornadas E2E | `pnpm e2e` (Playwright, build de produção) | 33/33, estável em execução repetida (66/66 com `--repeat-each=2`) |
+| Contrato e mock do Lagoski | `pnpm test` (Vitest no `lagoski-contracts`) | 8/8: caminho feliz até a entrega, cartão recusado + expiração, sem estoque, idempotência, DLQ + redrive, duplicata, consumidor parado |
+| Jornadas E2E | `pnpm e2e` (Playwright, build de produção) | 43/43 (33 do PayOps/portfólio + 10 do Lagoski) |
 
 ## Testes E2E (Playwright)
 
@@ -203,7 +261,8 @@ no teste que derruba o remote de propósito.
 | Prompt injection | os 5 ataques: documento em quarentena e só a ação pedida |
 | Isolamento | remote fora do ar só afeta a área dele e "Tentar de novo" recupera; remote roda sozinho; estado do mock não vaza entre carregamentos |
 | Acessibilidade | axe (WCAG 2 A/AA) sem violações sérias na home e na demo, temas claro e escuro |
-| Mobile (Pixel 7) | sem rolagem horizontal; jornada de cobrança completa |
+| Mobile (Pixel 7) | sem rolagem horizontal; jornada de cobrança completa; compra no Lagoski |
+| Lagoski | caminho feliz até `DELIVERED` com a saga no Inspector e e-mails; cartão recusado + checkout expirado libera estoque; sem estoque não aciona o Payment; mensagem envenenada → DLQ → reprocessar; consumidor parado acumula e recupera; duplicata ignorada pelo inbox; remote fora do ar isolado; axe nos dois temas |
 
 Bugs que a suíte encontrou e foram corrigidos:
 

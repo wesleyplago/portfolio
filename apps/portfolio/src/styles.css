@@ -77,3 +77,13 @@ h3 { font-size: 19px; }
 .remote-error pre { white-space: pre-wrap; font-size: 12px; }
 
 .footer { border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; padding: 24px 0 40px; }
+
+/* Lagoski: quatro microfrontends compostos numa página */
+.lagoski-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr); gap: 16px; align-items: start; }
+.lagoski-layout .lagoski-side { position: sticky; top: 12px; }
+.lagoski-layout .lagoski-wide { grid-column: 1 / -1; }
+@media (max-width: 900px) {
+  .lagoski-layout { grid-template-columns: minmax(0, 1fr); }
+  .lagoski-layout .lagoski-side { position: static; }
+}
+.lagoski-links { display: flex; gap: 10px; flex-wrap: wrap; }

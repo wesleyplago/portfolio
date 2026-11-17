@@ -1,0 +1,21 @@
+{
+  "name": "@portfolio/lagoski-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Contrato (Zod) da API do BFF Lagoski, cliente HTTP/SSE, mock do sistema inteiro e eventos entre os microfrontends.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

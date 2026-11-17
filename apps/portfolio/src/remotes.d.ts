@@ -10,3 +10,27 @@ declare module 'rag/App' {
   const RagApp: ComponentType;
   export default RagApp;
 }
+
+declare module 'lagoskiCatalog/App' {
+  import type { ComponentType } from 'react';
+  const LagoskiCatalogApp: ComponentType;
+  export default LagoskiCatalogApp;
+}
+
+declare module 'lagoskiCheckout/App' {
+  import type { ComponentType } from 'react';
+  const LagoskiCheckoutApp: ComponentType;
+  export default LagoskiCheckoutApp;
+}
+
+declare module 'lagoskiOrders/App' {
+  import type { ComponentType } from 'react';
+  const LagoskiOrdersApp: ComponentType;
+  export default LagoskiOrdersApp;
+}
+
+declare module 'lagoskiInspector/App' {
+  import type { ComponentType } from 'react';
+  const LagoskiInspectorApp: ComponentType;
+  export default LagoskiInspectorApp;
+}

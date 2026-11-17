@@ -17,6 +17,10 @@ export const HOST_URL = `http://localhost:${HOST_PORT}`;
 export const PAYOPS_URL = `http://localhost:${PAYOPS_PORT}`;
 export const RAG_URL = `http://localhost:${RAG_PORT}`;
 
+// Lagoski: quatro remotes, um por bounded context com UI, em modo demo (sistema simulado).
+export const LAGOSKI = { catalog: 5283, checkout: 5284, orders: 5285, inspector: 5286 } as const;
+const lagoskiUrl = (name: keyof typeof LAGOSKI) => `http://localhost:${LAGOSKI[name]}`;
+
 const mockPayOpsEnv = {
   VITE_PAYOPS_API_URL: '',
   VITE_PAYOPS_AGENT_KEY: '',
@@ -63,6 +67,14 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },
+    ...(Object.keys(LAGOSKI) as Array<keyof typeof LAGOSKI>).map((name) => ({
+      command: `pnpm --filter @portfolio/lagoski-${name} build && pnpm --filter @portfolio/lagoski-${name} exec vite preview --port ${LAGOSKI[name]} --strictPort`,
+      cwd: '..',
+      url: `${lagoskiUrl(name)}/remoteEntry.js`,
+      env: { VITE_LAGOSKI_API_URL: '', [`LAGOSKI_${name.toUpperCase()}_PORT`]: String(LAGOSKI[name]) },
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    })),
     {
       command: `pnpm --filter @portfolio/shell build && pnpm --filter @portfolio/shell exec vite preview --port ${HOST_PORT} --strictPort`,
       cwd: '..',
@@ -71,6 +83,10 @@ export default defineConfig({
         PORTFOLIO_PORT: String(HOST_PORT),
         VITE_PAYOPS_REMOTE_URL: `${PAYOPS_URL}/remoteEntry.js`,
         VITE_RAG_REMOTE_URL: `${RAG_URL}/remoteEntry.js`,
+        VITE_LAGOSKI_CATALOG_REMOTE_URL: `${lagoskiUrl('catalog')}/remoteEntry.js`,
+        VITE_LAGOSKI_CHECKOUT_REMOTE_URL: `${lagoskiUrl('checkout')}/remoteEntry.js`,
+        VITE_LAGOSKI_ORDERS_REMOTE_URL: `${lagoskiUrl('orders')}/remoteEntry.js`,
+        VITE_LAGOSKI_INSPECTOR_REMOTE_URL: `${lagoskiUrl('inspector')}/remoteEntry.js`,
       },
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,

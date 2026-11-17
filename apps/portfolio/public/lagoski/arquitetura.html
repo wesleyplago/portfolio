@@ -1,0 +1,895 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Arquitetura do Lagoski: bounded contexts, eventos, saga com Stripe, AWS × GCP, microfrontends e Terraform.">
+<title>Lagoski Arquitetura</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Página standalone (servida pelo portfólio). Os diagramas mermaid são renderizados pelo script no fim. */
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<style>
+/* Layout: blueprint técnico em coluna única; cada bounded context tem uma cor fixa usada em todos os diagramas */
+:root {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --ink: #15202c;
+  --muted: #5a6778;
+  --line: #d3dae3;
+  --accent: #2c56c9;
+  --accent-soft: #e4ebfb;
+  --code-bg: #eef1f6;
+
+  --cat-f: #dff2f0; --cat-s: #0f766e;
+  --ord-f: #e6e8fb; --ord-s: #4338ca;
+  --inv-f: #fcefd8; --inv-s: #b45309;
+  --pay-f: #fbe3ea; --pay-s: #be185d;
+  --ful-f: #e2f3e5; --ful-s: #15803d;
+  --not-f: #ece8f3; --not-s: #6b5b8a;
+  --neu-f: #ffffff; --neu-s: #8794a6;
+
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --display: "Space Grotesk", "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e131a; --surface: #151c26; --ink: #e5eaf1; --muted: #98a4b4; --line: #2a3442;
+    --accent: #86a6ff; --accent-soft: #1b2643; --code-bg: #1a2230;
+    --cat-f: #0f2f2c; --cat-s: #5eead4;
+    --ord-f: #1e2150; --ord-s: #a5b4fc;
+    --inv-f: #362710; --inv-s: #fbbf24;
+    --pay-f: #3a1526; --pay-s: #f9a8d4;
+    --ful-f: #122e1b; --ful-s: #86efac;
+    --not-f: #282336; --not-s: #c4b5fd;
+    --neu-f: #151c26; --neu-s: #6b7a8e;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e131a; --surface: #151c26; --ink: #e5eaf1; --muted: #98a4b4; --line: #2a3442;
+  --accent: #86a6ff; --accent-soft: #1b2643; --code-bg: #1a2230;
+  --cat-f: #0f2f2c; --cat-s: #5eead4;
+  --ord-f: #1e2150; --ord-s: #a5b4fc;
+  --inv-f: #362710; --inv-s: #fbbf24;
+  --pay-f: #3a1526; --pay-s: #f9a8d4;
+  --ful-f: #122e1b; --ful-s: #86efac;
+  --not-f: #282336; --not-s: #c4b5fd;
+  --neu-f: #151c26; --neu-s: #6b7a8e;
+  color-scheme: dark;
+}
+
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--sans); }
+.page {
+  max-width: 1120px; margin: 0 auto;
+  padding-block: 40px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 56px;
+}
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(32px, 5vw, 46px); font-weight: 700; letter-spacing: -0.02em; }
+h2 { font-size: 26px; font-weight: 600; letter-spacing: -0.01em; }
+h3 { font-size: 17px; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+code, .mono { font-family: var(--mono); font-size: 0.88em; }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+.eyebrow { font: 500 12px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+header { display: grid; gap: 16px; }
+header .lede { font-size: 17px; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 500;
+  background: var(--f, var(--surface)); color: var(--s, var(--ink)); border: 1px solid var(--s, var(--line));
+}
+nav.toc { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; border-top: 1px solid var(--line); padding-top: 14px; }
+nav.toc a { text-decoration: none; color: var(--muted); }
+nav.toc a:hover { color: var(--accent); }
+
+.ctx-catalog { --f: var(--cat-f); --s: var(--cat-s); }
+.ctx-ordering { --f: var(--ord-f); --s: var(--ord-s); }
+.ctx-inventory { --f: var(--inv-f); --s: var(--inv-s); }
+.ctx-payment { --f: var(--pay-f); --s: var(--pay-s); }
+.ctx-fulfillment { --f: var(--ful-f); --s: var(--ful-s); }
+.ctx-notification { --f: var(--not-f); --s: var(--not-s); }
+.ctx-neutral { --f: var(--neu-f); --s: var(--neu-s); }
+.ctx-accent { --f: var(--accent-soft); --s: var(--accent); }
+
+section { display: grid; gap: 18px; }
+section > header { gap: 8px; }
+.diagram-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+.diagram-wrap svg { display: block; width: 100%; min-width: 760px; height: auto; }
+.diagram-wrap pre.mermaid { margin: 0; background: transparent; min-width: 640px; }
+.note { font-size: 14px; color: var(--muted); }
+
+/* SVG */
+svg .box { fill: var(--f, var(--surface)); stroke: var(--s, var(--line)); stroke-width: 1.5; }
+svg .zone { fill: none; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 5 4; }
+svg .bus { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; }
+svg .ext { fill: var(--surface); stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 6 4; }
+svg .t { fill: var(--ink); font: 600 13.5px var(--sans); }
+svg .tc { fill: var(--s, var(--ink)); font: 600 13.5px var(--sans); }
+svg .ts { fill: var(--muted); font: 400 11.5px var(--sans); }
+svg .tm { fill: var(--ink); font: 500 11.5px var(--mono); }
+svg .zl { fill: var(--muted); font: 500 11px var(--mono); letter-spacing: 0.08em; }
+svg .mid { text-anchor: middle; }
+svg .end { text-anchor: end; }
+svg .ln { fill: none; stroke: var(--muted); stroke-width: 1.4; }
+svg .pub { fill: none; stroke: var(--s, var(--ink)); stroke-width: 1.8; }
+svg .sub { fill: none; stroke: var(--s, var(--ink)); stroke-width: 1.5; stroke-dasharray: 4 3; }
+svg .acc { fill: none; stroke: var(--accent); stroke-width: 1.6; }
+svg .acl { fill: none; stroke: var(--pay-s); stroke-width: 1.5; stroke-dasharray: 6 4; }
+svg .head { fill: context-stroke; }
+svg .db { fill: var(--surface); stroke: var(--s, var(--muted)); stroke-width: 1.3; }
+
+/* Tabela de assinaturas */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 860px; font-size: 13px; }
+th, td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+thead th { font: 600 12px var(--sans); color: var(--muted); background: var(--code-bg); position: sticky; top: 0; }
+tbody tr:last-child td, tbody tr:last-child th { border-bottom: 0; }
+tbody th { font: 500 12.5px var(--mono); white-space: nowrap; }
+.ev { display: block; font: 12px var(--mono); color: var(--s, var(--ink)); white-space: nowrap; }
+.pubtag { display: inline-block; font: 600 11px var(--sans); letter-spacing: 0.04em; text-transform: uppercase; color: var(--s); border: 1px solid var(--s); border-radius: 4px; padding: 0 6px; }
+.all { color: var(--muted); font-style: italic; }
+td.empty { color: var(--line); }
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+.tabs button {
+  font: 600 14px var(--sans); color: var(--muted); background: none; border: 0; cursor: pointer;
+  padding: 10px 14px; border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+.tabs button:hover { color: var(--ink); }
+pre.code { margin: 0; background: var(--code-bg); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font: 12.5px/1.55 var(--mono); color: var(--ink); }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.two > * { min-width: 0; }
+.cap { font: 500 12px var(--mono); color: var(--muted); margin-bottom: 6px; }
+
+/* Microfrontends */
+.mfe-shell { border: 1.5px dashed var(--neu-s); border-radius: 14px; padding: 16px; display: grid; gap: 14px; background: var(--surface); }
+.mfe-top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; align-items: baseline; }
+.mfe-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.mfe { background: var(--f); border: 1.5px solid var(--s); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; align-content: start; }
+.mfe h3 { color: var(--s); font-family: var(--mono); font-size: 14px; font-weight: 500; }
+.mfe .own { font-size: 12px; color: var(--muted); }
+.mfe p { font-size: 13.5px; }
+.mfe .routes { font: 12px var(--mono); color: var(--muted); }
+.busbar { border-radius: 10px; background: var(--accent-soft); border: 1.5px solid var(--accent); padding: 10px 14px; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 13px; }
+.busbar strong { color: var(--accent); }
+.busbar code { background: var(--surface); border-radius: 4px; padding: 1px 6px; }
+
+/* Terraform */
+.tf { display: grid; grid-template-columns: minmax(0, 1.1fr) auto minmax(0, 1fr) auto minmax(0, 1.2fr); gap: 12px; align-items: center; }
+.tf .arrow { color: var(--muted); font: 20px var(--mono); text-align: center; }
+.tf .stack { display: grid; gap: 12px; }
+.mod { border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--surface); display: grid; gap: 4px; }
+.mod .k { font: 600 13px var(--mono); }
+.mod ul { margin: 0; padding-left: 18px; font-size: 13px; color: var(--muted); }
+@media (max-width: 820px) {
+  .tf { grid-template-columns: minmax(0, 1fr); }
+  .tf .arrow { transform: rotate(90deg); }
+}
+
+/* Decisões */
+dl.adr { display: grid; grid-template-columns: minmax(180px, 260px) minmax(0, 1fr); gap: 0; margin: 0; border-top: 1px solid var(--line); }
+dl.adr dt, dl.adr dd { padding: 12px 0; border-bottom: 1px solid var(--line); margin: 0; }
+dl.adr dt { font-weight: 600; padding-right: 16px; }
+dl.adr dd { color: var(--muted); }
+@media (max-width: 640px) {
+  dl.adr { grid-template-columns: minmax(0, 1fr); }
+  dl.adr dt { border-bottom: 0; padding-bottom: 2px; }
+  dl.adr dd { padding-top: 0; }
+}
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<div class="page">
+
+<header>
+  <div class="eyebrow">Arquitetura proposta · draft v0.1 · 17 nov 2026</div>
+  <h1>Lagoski</h1>
+  <p class="lede">Uma loja de camisetas dividida em seis bounded contexts que conversam só por eventos. Roda na AWS (SNS + SQS) e no GCP (Pub/Sub) com o mesmo código, cada serviço tem repositório e Terraform próprios, e o SPA é feito de microfrontends no portfólio. O pagamento usa o Stripe em modo de testes, atrás de uma Anti-Corruption Layer.</p>
+  <div class="legend" aria-label="Cores dos bounded contexts">
+    <span class="chip ctx-catalog">Catalog</span>
+    <span class="chip ctx-ordering">Ordering · core</span>
+    <span class="chip ctx-inventory">Inventory</span>
+    <span class="chip ctx-payment">Payment</span>
+    <span class="chip ctx-fulfillment">Fulfillment</span>
+    <span class="chip ctx-notification">Notification</span>
+    <span class="chip ctx-accent">Plataforma / barramento</span>
+  </div>
+  <nav class="toc" aria-label="Seções">
+    <a href="#repos">Repositórios</a>
+    <a href="#visao">Visão geral</a>
+    <a href="#contextos">Context map</a>
+    <a href="#assinaturas">Tópicos e assinaturas</a>
+    <a href="#saga">Saga do pedido</a>
+    <a href="#nuvens">AWS × GCP</a>
+    <a href="#servico">Anatomia de um serviço</a>
+    <a href="#mfe">Microfrontends</a>
+    <a href="#terraform">Terraform</a>
+    <a href="#decisoes">Decisões</a>
+  </nav>
+</header>
+
+<!-- 0. Repositórios -->
+<section id="repos">
+  <header>
+    <div class="eyebrow">Polyrepo</div>
+    <h2>Um repositório por serviço</h2>
+    <p class="note">Cada microsserviço tem código, testes, Dockerfile e pasta <code>infrastructure/</code> com Terraform próprio. Eles compartilham schemas, não código.</p>
+  </header>
+  <div class="table-wrap">
+    <table style="min-width:640px">
+      <thead><tr><th scope="col">Repositório</th><th scope="col">Contexto</th><th scope="col">Papel</th></tr></thead>
+      <tbody>
+        <tr><th scope="row" class="ctx-catalog">lagoski-catalog</th><td>Catalog</td><td>produtos, variantes e preço</td></tr>
+        <tr><th scope="row" class="ctx-ordering">lagoski-ordering</th><td>Ordering (core)</td><td>carrinho, pedido e saga</td></tr>
+        <tr><th scope="row" class="ctx-inventory">lagoski-inventory</th><td>Inventory</td><td>reserva, baixa e expiração</td></tr>
+        <tr><th scope="row" class="ctx-payment">lagoski-payment</th><td>Payment</td><td>Stripe Checkout (sandbox) atrás de uma ACL</td></tr>
+        <tr><th scope="row" class="ctx-fulfillment">lagoski-fulfillment</th><td>Fulfillment</td><td>remessa simulada</td></tr>
+        <tr><th scope="row" class="ctx-notification">lagoski-notification</th><td>Notification</td><td>e-mails simulados</td></tr>
+        <tr><th scope="row">lagoski-bff</th><td>Edge</td><td>API do SPA, SSE dos eventos e entrada do webhook do Stripe</td></tr>
+        <tr><th scope="row">lagoski-platform</th><td>—</td><td>base compartilhada, catálogo de tópicos, compose local, spec e ADRs</td></tr>
+        <tr><th scope="row">lagoski-contracts</th><td>—</td><td>JSON Schemas e AsyncAPI (Published Language)</td></tr>
+        <tr><th scope="row">portfolio</th><td>—</td><td>quatro microfrontends Lagoski e esta página</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 1. Visão geral -->
+<section id="visao">
+  <header>
+    <div class="eyebrow">Visão geral</div>
+    <h2>Do navegador ao barramento de eventos</h2>
+    <p class="note">O único tráfego HTTP é entre o navegador, o BFF e os serviços. Entre serviços, tudo passa pelos tópicos. Cada serviço tem o próprio banco e publica pelo outbox.</p>
+  </header>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 1000 640" role="img" aria-label="Diagrama da arquitetura: SPA, edge, BFF, seis serviços com bancos próprios e barramento de eventos com um tópico por contexto">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" class="head"/>
+        </marker>
+      </defs>
+
+      <!-- Navegador -->
+      <rect x="20" y="16" width="960" height="88" rx="12" class="zone"/>
+      <text x="36" y="38" class="zl">NAVEGADOR · SPA COM MODULE FEDERATION</text>
+      <g class="ctx-neutral"><rect x="47" y="54" width="170" height="36" rx="18" class="box"/><text x="132" y="77" class="tc mid">portfolio (host)</text></g>
+      <g class="ctx-catalog"><rect x="231" y="54" width="170" height="36" rx="18" class="box"/><text x="316" y="77" class="tc mid">lagoski-catalog</text></g>
+      <g class="ctx-ordering"><rect x="415" y="54" width="170" height="36" rx="18" class="box"/><text x="500" y="77" class="tc mid">lagoski-checkout</text></g>
+      <g class="ctx-fulfillment"><rect x="599" y="54" width="170" height="36" rx="18" class="box"/><text x="684" y="77" class="tc mid">lagoski-orders</text></g>
+      <g class="ctx-accent"><rect x="783" y="54" width="170" height="36" rx="18" class="box"/><text x="868" y="77" class="tc mid">lagoski-inspector</text></g>
+
+      <path d="M500,104 V126" class="ln" marker-end="url(#ah)"/>
+
+      <!-- Edge -->
+      <rect x="20" y="128" width="960" height="44" rx="10" class="zone"/>
+      <text x="36" y="155" class="zl">EDGE</text>
+      <text x="500" y="155" class="t mid">CloudFront + ALB (AWS) · HTTPS LB + Cloud CDN (GCP)</text>
+      <text x="964" y="155" class="ts end">estáticos em S3 / GCS</text>
+
+      <path d="M500,172 V198" class="ln" marker-end="url(#ah)"/>
+
+      <!-- BFF -->
+      <g class="ctx-neutral"><rect x="370" y="200" width="260" height="52" rx="10" class="box"/></g>
+      <text x="500" y="222" class="t mid">BFF / Edge API</text>
+      <text x="500" y="241" class="ts mid">proxy /api/* · SSE /api/stream</text>
+
+      <!-- Gateway -->
+      <rect x="740" y="200" width="220" height="52" rx="10" class="ext"/>
+      <text x="850" y="222" class="t mid">Gateway de pagamento</text>
+      <text x="850" y="241" class="ts mid">Stripe Checkout · sandbox</text>
+
+      <!-- Observer -->
+      <path d="M32,440 V226 H368" class="acc" marker-end="url(#ah)"/>
+      <text x="44" y="218" class="ts">bff.observer (sem filtro) → SSE para o Inspector</text>
+
+      <!-- HTTP -->
+      <path d="M500,252 V276 M110,276 H890" class="ln"/>
+      <path d="M110,276 V298" class="ln" marker-end="url(#ah)"/>
+      <path d="M266,276 V298" class="ln" marker-end="url(#ah)"/>
+      <path d="M422,276 V298" class="ln" marker-end="url(#ah)"/>
+      <path d="M578,276 V298" class="ln" marker-end="url(#ah)"/>
+      <path d="M890,276 V298" class="ln" marker-end="url(#ah)"/>
+      <text x="120" y="269" class="ts">HTTP (comandos e consultas do usuário)</text>
+
+      <!-- ACL -->
+      <path d="M772,252 L650,301" class="acl"/>
+      <text x="770" y="292" class="ts">ACL + webhook</text>
+
+      <!-- Serviços -->
+      <g class="ctx-catalog">
+        <rect x="40" y="300" width="140" height="92" rx="10" class="box"/>
+        <text x="110" y="326" class="tc mid">Catalog</text>
+        <text x="110" y="344" class="ts mid">supporting</text>
+        <path d="M52,364 v12 a8,3 0 0 0 16,0 v-12" class="db"/><ellipse cx="60" cy="364" rx="8" ry="3" class="db"/>
+        <text x="74" y="378" class="tm">catalog_db</text>
+        <path d="M96,392 V486" class="pub" marker-end="url(#ah)"/>
+        <path d="M124,488 V394" class="sub" marker-end="url(#ah)"/>
+      </g>
+      <g class="ctx-ordering">
+        <rect x="196" y="300" width="140" height="92" rx="10" class="box"/>
+        <text x="266" y="326" class="tc mid">Ordering</text>
+        <text x="266" y="344" class="ts mid">core · saga</text>
+        <path d="M208,364 v12 a8,3 0 0 0 16,0 v-12" class="db"/><ellipse cx="216" cy="364" rx="8" ry="3" class="db"/>
+        <text x="230" y="378" class="tm">ordering_db</text>
+        <path d="M252,392 V486" class="pub" marker-end="url(#ah)"/>
+        <path d="M280,488 V394" class="sub" marker-end="url(#ah)"/>
+      </g>
+      <g class="ctx-inventory">
+        <rect x="352" y="300" width="140" height="92" rx="10" class="box"/>
+        <text x="422" y="326" class="tc mid">Inventory</text>
+        <text x="422" y="344" class="ts mid">supporting</text>
+        <path d="M364,364 v12 a8,3 0 0 0 16,0 v-12" class="db"/><ellipse cx="372" cy="364" rx="8" ry="3" class="db"/>
+        <text x="386" y="378" class="tm">inventory_db</text>
+        <path d="M408,392 V486" class="pub" marker-end="url(#ah)"/>
+        <path d="M436,488 V394" class="sub" marker-end="url(#ah)"/>
+      </g>
+      <g class="ctx-payment">
+        <rect x="508" y="300" width="140" height="92" rx="10" class="box"/>
+        <text x="578" y="326" class="tc mid">Payment</text>
+        <text x="578" y="344" class="ts mid">generic · ACL</text>
+        <path d="M520,364 v12 a8,3 0 0 0 16,0 v-12" class="db"/><ellipse cx="528" cy="364" rx="8" ry="3" class="db"/>
+        <text x="542" y="378" class="tm">payment_db</text>
+        <path d="M564,392 V486" class="pub" marker-end="url(#ah)"/>
+        <path d="M592,488 V394" class="sub" marker-end="url(#ah)"/>
+      </g>
+      <g class="ctx-fulfillment">
+        <rect x="664" y="300" width="140" height="92" rx="10" class="box"/>
+        <text x="734" y="326" class="tc mid">Fulfillment</text>
+        <text x="734" y="344" class="ts mid">supporting</text>
+        <path d="M676,364 v12 a8,3 0 0 0 16,0 v-12" class="db"/><ellipse cx="684" cy="364" rx="8" ry="3" class="db"/>
+        <text x="698" y="378" class="tm">fulfillment_db</text>
+        <path d="M720,392 V486" class="pub" marker-end="url(#ah)"/>
+        <path d="M748,488 V394" class="sub" marker-end="url(#ah)"/>
+      </g>
+      <g class="ctx-notification">
+        <rect x="820" y="300" width="140" height="92" rx="10" class="box"/>
+        <text x="890" y="326" class="tc mid">Notification</text>
+        <text x="890" y="344" class="ts mid">generic</text>
+        <path d="M832,364 v12 a8,3 0 0 0 16,0 v-12" class="db"/><ellipse cx="840" cy="364" rx="8" ry="3" class="db"/>
+        <text x="854" y="378" class="tm">notification_db</text>
+        <path d="M904,488 V394" class="sub" marker-end="url(#ah)"/>
+      </g>
+
+      <!-- Barramento -->
+      <rect x="20" y="440" width="960" height="132" rx="12" class="bus"/>
+      <g class="ctx-catalog"><rect x="40" y="490" width="140" height="34" rx="17" class="box"/><text x="110" y="511" class="tm mid">catalog.events</text></g>
+      <g class="ctx-ordering"><rect x="196" y="490" width="140" height="34" rx="17" class="box"/><text x="266" y="511" class="tm mid">ordering.events</text></g>
+      <g class="ctx-inventory"><rect x="352" y="490" width="140" height="34" rx="17" class="box"/><text x="422" y="511" class="tm mid">inventory.events</text></g>
+      <g class="ctx-payment"><rect x="508" y="490" width="140" height="34" rx="17" class="box"/><text x="578" y="511" class="tm mid">payment.events</text></g>
+      <g class="ctx-fulfillment"><rect x="664" y="490" width="140" height="34" rx="17" class="box"/><text x="734" y="511" class="tm mid">fulfillment.events</text></g>
+      <text x="890" y="511" class="ts mid">sem tópico próprio</text>
+      <text x="36" y="558" class="zl">BARRAMENTO · SNS + SQS (AWS) · PUB/SUB (GCP)</text>
+      <text x="964" y="558" class="ts end">1 fila por consumidor · filtro por ce_type · DLQ</text>
+
+      <!-- Legenda -->
+      <g class="ctx-neutral">
+        <path d="M40,606 H80" class="pub" marker-end="url(#ah)"/>
+        <text x="90" y="610" class="ts">publica (outbox → tópico)</text>
+        <path d="M270,606 H310" class="sub" marker-end="url(#ah)"/>
+        <text x="320" y="610" class="ts">consome (assinatura filtrada → fila)</text>
+      </g>
+      <path d="M545,606 H585" class="ln" marker-end="url(#ah)"/>
+      <text x="595" y="610" class="ts">HTTP</text>
+      <path d="M650,606 H690" class="acl"/>
+      <text x="700" y="610" class="ts">Anti-Corruption Layer</text>
+      <path d="M850,606 H890" class="acc" marker-end="url(#ah)"/>
+      <text x="900" y="610" class="ts">observer</text>
+    </svg>
+  </div>
+</section>
+
+<!-- 2. Context map -->
+<section id="contextos">
+  <header>
+    <div class="eyebrow">Design estratégico</div>
+    <h2>Context map</h2>
+    <p class="note">Cada seta é um contrato publicado (Published Language) num tópico do contexto upstream. O Payment se protege do Stripe com uma ACL, e o Notification aceita os eventos como chegam (Conformist).</p>
+  </header>
+  <div class="diagram-wrap">
+<pre class="mermaid">
+flowchart LR
+  CAT["Catalog"]
+  ORD["Ordering (core)"]
+  INV["Inventory"]
+  PAY["Payment"]
+  FUL["Fulfillment"]
+  NOT["Notification"]
+  GW[("Stripe / Gateway externo")]
+  CAT -- "PL / OHS: catalog.events" --> ORD
+  CAT -- "PL / OHS: catalog.events" --> INV
+  ORD -- "Customer/Supplier: ordering.events" --> INV
+  ORD -- "PL: ordering.events" --> PAY
+  ORD -- "PL: ordering.events" --> FUL
+  INV -- "PL: inventory.events" --> ORD
+  INV -- "PL: inventory.events" --> PAY
+  PAY -- "PL: payment.events" --> ORD
+  FUL -- "PL: fulfillment.events" --> ORD
+  PAY -- "ACL" --> GW
+  ORD -- "Conformist" --> NOT
+  PAY -- "Conformist" --> NOT
+  FUL -- "Conformist" --> NOT
+</pre>
+  </div>
+</section>
+
+<!-- 3. Tópicos e assinaturas -->
+<section id="assinaturas">
+  <header>
+    <div class="eyebrow">Published Language</div>
+    <h2>Tópicos e assinaturas</h2>
+    <p class="note">Cada célula é uma assinatura com filtro por <code>ce_type</code>. O consumidor recebe só os tipos listados, na sua própria fila. Os prefixos <code>lagoski.&lt;contexto&gt;.</code> e o sufixo <code>.v1</code> foram omitidos.</p>
+  </header>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Tópico</th>
+          <th scope="col">Catalog</th>
+          <th scope="col">Ordering</th>
+          <th scope="col">Inventory</th>
+          <th scope="col">Payment</th>
+          <th scope="col">Fulfillment</th>
+          <th scope="col">Notification</th>
+          <th scope="col">BFF · Archive</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row" class="ctx-catalog">catalog.events</th>
+          <td class="ctx-catalog"><span class="pubtag">publica</span></td>
+          <td class="ctx-catalog"><span class="ev">product.published</span><span class="ev">variant.price-changed</span><span class="ev">product.discontinued</span></td>
+          <td class="ctx-catalog"><span class="ev">product.published</span><span class="ev">product.discontinued</span></td>
+          <td class="empty">—</td><td class="empty">—</td><td class="empty">—</td>
+          <td class="all">tudo</td>
+        </tr>
+        <tr>
+          <th scope="row" class="ctx-ordering">ordering.events</th>
+          <td class="empty">—</td>
+          <td class="ctx-ordering"><span class="pubtag">publica</span></td>
+          <td class="ctx-ordering"><span class="ev">order.placed</span><span class="ev">order.confirmed</span><span class="ev">order.cancelled</span></td>
+          <td class="ctx-ordering"><span class="ev">order.placed</span><span class="ev">order.cancelled</span></td>
+          <td class="ctx-ordering"><span class="ev">order.confirmed</span></td>
+          <td class="ctx-ordering"><span class="ev">order.confirmed</span><span class="ev">order.cancelled</span></td>
+          <td class="all">tudo</td>
+        </tr>
+        <tr>
+          <th scope="row" class="ctx-inventory">inventory.events</th>
+          <td class="empty">—</td>
+          <td class="ctx-inventory"><span class="ev">stock.reserved</span><span class="ev">stock.reservation-rejected</span><span class="ev">reservation.expired</span></td>
+          <td class="ctx-inventory"><span class="pubtag">publica</span></td>
+          <td class="ctx-inventory"><span class="ev">stock.reserved</span></td>
+          <td class="empty">—</td><td class="empty">—</td>
+          <td class="all">tudo</td>
+        </tr>
+        <tr>
+          <th scope="row" class="ctx-payment">payment.events</th>
+          <td class="empty">—</td>
+          <td class="ctx-payment"><span class="ev">payment.requested</span><span class="ev">payment.authorized</span><span class="ev">payment.declined</span></td>
+          <td class="empty">—</td>
+          <td class="ctx-payment"><span class="pubtag">publica</span></td>
+          <td class="empty">—</td>
+          <td class="ctx-payment"><span class="ev">payment.declined</span></td>
+          <td class="all">tudo</td>
+        </tr>
+        <tr>
+          <th scope="row" class="ctx-fulfillment">fulfillment.events</th>
+          <td class="empty">—</td>
+          <td class="ctx-fulfillment"><span class="ev">shipment.dispatched</span><span class="ev">shipment.delivered</span></td>
+          <td class="empty">—</td><td class="empty">—</td>
+          <td class="ctx-fulfillment"><span class="pubtag">publica</span></td>
+          <td class="ctx-fulfillment"><span class="ev">shipment.dispatched</span></td>
+          <td class="all">tudo</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="two">
+    <div>
+      <div class="cap">envelope CloudEvents 1.0</div>
+<pre class="code">{
+  "specversion": "1.0",
+  "id": "01JD3X7Q9Z8K2M4N6P8R0T2V4X",
+  "source": "lagoski/ordering",
+  "type": "lagoski.ordering.order.placed.v1",
+  "correlationid": "ord_01JD3X…",
+  "causationid": "01JD3X7Q…",
+  "traceparent": "00-4bf9…-01",
+  "data": { "orderId": "ord_01JD3X…", "totalAmount": 15980 }
+}</pre>
+    </div>
+    <div>
+      <div class="cap">atributos da mensagem (usados nos filtros)</div>
+<pre class="code">ce_type         lagoski.ordering.order.placed.v1
+ce_source       lagoski/ordering
+ce_id           01JD3X7Q9Z8K2M4N6P8R0T2V4X
+correlation_id  ord_01JD3X…
+traceparent     00-4bf9…-01</pre>
+      <p class="note" style="margin-top:10px">Valores em centavos. Quebra de contrato gera um <code>v2</code> publicado em paralelo até todos os consumidores migrarem.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 4. Saga -->
+<section id="saga">
+  <header>
+    <div class="eyebrow">Fluxo de negócio</div>
+    <h2>Saga do pedido por coreografia</h2>
+    <p class="note">Nenhum serviço comanda os outros. Cada um reage aos fatos que assina. O Payment guarda uma projeção local do pedido (<code>PayableOrder</code>) para saber o valor sem chamar o Ordering. O webhook do Stripe entra pelo BFF e é verificado pela assinatura.</p>
+  </header>
+  <div class="diagram-wrap">
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  participant UI as SPA (mfe-checkout)
+  participant BFF
+  participant ORD as Ordering
+  participant INV as Inventory
+  participant PAY as Payment
+  participant GW as Stripe (sandbox)
+  participant FUL as Fulfillment
+  participant NOT as Notification
+  UI->>BFF: POST /orders (cartId)
+  BFF->>ORD: POST /orders
+  Note over ORD: Order = PENDING + outbox
+  ORD--)INV: OrderPlaced
+  ORD--)PAY: OrderPlaced (projeção PayableOrder)
+  Note over INV: reserva SKUs (TTL 15 min)
+  alt estoque disponível
+    INV--)ORD: StockReserved
+    INV--)PAY: StockReserved
+    PAY->>GW: cria Checkout Session (ACL, idempotency key)
+    PAY--)ORD: PaymentRequested (checkoutUrl)
+    ORD--)UI: SSE AWAITING_PAYMENT
+    UI->>GW: paga no Checkout hospedado (cartão de teste)
+    GW-)BFF: webhook checkout.session.completed
+    BFF->>PAY: repassa corpo cru e assinatura
+    PAY--)ORD: PaymentAuthorized
+    ORD--)INV: OrderConfirmed (baixa: StockCommitted)
+    ORD--)FUL: OrderConfirmed
+    FUL--)ORD: ShipmentDispatched e ShipmentDelivered
+    ORD--)NOT: OrderConfirmed (e-mail simulado)
+  else sem estoque
+    INV--)ORD: StockReservationRejected
+    ORD--)NOT: OrderCancelled (OUT_OF_STOCK)
+  end
+</pre>
+  </div>
+  <div class="two">
+    <div class="diagram-wrap">
+      <div class="cap">máquina de estados do Order</div>
+<pre class="mermaid">
+stateDiagram-v2
+  [*] --> PENDING
+  PENDING --> AWAITING_PAYMENT: StockReserved
+  PENDING --> CANCELLED: StockReservationRejected
+  AWAITING_PAYMENT --> CONFIRMED: PaymentAuthorized
+  AWAITING_PAYMENT --> CANCELLED: PaymentDeclined ou ReservationExpired
+  CONFIRMED --> SHIPPED: ShipmentDispatched
+  SHIPPED --> DELIVERED: ShipmentDelivered
+  DELIVERED --> [*]
+  CANCELLED --> [*]
+</pre>
+    </div>
+    <div>
+      <div class="cap">compensações</div>
+      <div class="table-wrap">
+        <table style="min-width:0">
+          <thead><tr><th>Gatilho</th><th>Quem reage</th><th>Ação</th></tr></thead>
+          <tbody>
+            <tr><td><code>StockReservationRejected</code></td><td>Ordering</td><td>cancela o pedido</td></tr>
+            <tr><td><code>PaymentDeclined</code></td><td>Ordering</td><td>cancela o pedido</td></tr>
+            <tr><td><code>OrderCancelled</code></td><td>Inventory</td><td>libera reserva → <code>StockReleased</code></td></tr>
+            <tr><td><code>OrderCancelled</code> após autorização</td><td>Payment</td><td>estorno no Stripe → <code>PaymentRefunded</code></td></tr>
+            <tr><td>TTL da reserva</td><td>Inventory</td><td><code>ReservationExpired</code> → Ordering cancela</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note" style="margin-top:10px">O Inventory reage a <code>OrderCancelled</code>, não a <code>PaymentDeclined</code>. Ele conhece o ciclo de vida do pedido, não os detalhes do pagamento.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 5. Nuvens -->
+<section id="nuvens">
+  <header>
+    <div class="eyebrow">Portabilidade</div>
+    <h2>A mesma topologia na AWS e no GCP</h2>
+    <p class="note">Exemplo do tópico <code>ordering.events</code> e três assinaturas. A porta <code>EventSubscriber</code> esconde a diferença: na AWS o serviço lê a fila por polling, no GCP o Pub/Sub entrega por push no Cloud Run.</p>
+  </header>
+  <div class="tabs" role="tablist" aria-label="Provedor de nuvem">
+    <button id="tab-aws" role="tab" aria-selected="true" aria-controls="cloud-panel" data-cloud="aws">AWS · SNS + SQS</button>
+    <button id="tab-gcp" role="tab" aria-selected="false" aria-controls="cloud-panel" data-cloud="gcp">GCP · Pub/Sub</button>
+  </div>
+  <div id="cloud-panel" role="tabpanel" aria-labelledby="tab-aws" style="display:grid;gap:16px">
+    <div class="diagram-wrap" id="cloud-svg"></div>
+    <div class="two">
+      <div><div class="cap" id="cloud-cap-a"></div><pre class="code" id="cloud-code-a"></pre></div>
+      <div><div class="cap" id="cloud-cap-b"></div><pre class="code" id="cloud-code-b"></pre></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. Serviço -->
+<section id="servico">
+  <header>
+    <div class="eyebrow">Ports &amp; Adapters</div>
+    <h2>Anatomia de um serviço</h2>
+    <p class="note">O agregado, a linha do outbox e o registro do inbox são gravados na mesma transação. Isso elimina o dual-write e torna o consumo idempotente com entrega at-least-once.</p>
+  </header>
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 1000 330" role="img" aria-label="Arquitetura hexagonal do serviço Ordering com outbox e inbox">
+      <defs>
+        <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" class="head"/>
+        </marker>
+      </defs>
+      <g class="ctx-neutral">
+        <rect x="20" y="40" width="180" height="62" rx="10" class="box"/>
+        <text x="110" y="66" class="t mid">HTTP · Fastify</text>
+        <text x="110" y="85" class="ts mid">comandos e consultas</text>
+        <rect x="20" y="196" width="180" height="78" rx="10" class="box"/>
+        <text x="110" y="222" class="t mid">EventSubscriber</text>
+        <text x="110" y="241" class="ts mid">valida JSON Schema</text>
+        <text x="110" y="258" class="ts mid">nack → retry → DLQ</text>
+      </g>
+      <path d="M200,71 H248" class="ln" marker-end="url(#ah2)"/>
+      <path d="M200,235 H248" class="ln" marker-end="url(#ah2)"/>
+
+      <rect x="250" y="20" width="320" height="270" rx="12" class="zone"/>
+      <text x="266" y="44" class="zl">APLICAÇÃO</text>
+      <text x="266" y="66" class="ts">casos de uso · handlers de eventos</text>
+      <g class="ctx-ordering">
+        <rect x="290" y="88" width="240" height="128" rx="10" class="box"/>
+        <text x="306" y="110" class="zl">DOMÍNIO</text>
+        <text x="410" y="138" class="tc mid">Order (agregado)</text>
+        <text x="410" y="160" class="ts mid">máquina de estados</text>
+        <text x="410" y="178" class="ts mid">invariantes · eventos de domínio</text>
+        <text x="410" y="196" class="ts mid">sem I/O</text>
+      </g>
+      <text x="410" y="250" class="ts mid">evento de domínio → evento de integração (v1)</text>
+      <text x="410" y="268" class="ts mid">o mapeamento acontece antes de gravar no outbox</text>
+
+      <path d="M570,90 H638" class="ln" marker-end="url(#ah2)"/>
+      <path d="M570,160 H638" class="ln" marker-end="url(#ah2)"/>
+      <path d="M570,230 H638" class="ln" marker-end="url(#ah2)"/>
+
+      <rect x="620" y="20" width="190" height="270" rx="12" class="zone"/>
+      <text x="636" y="44" class="zl">POSTGRES · ordering_db</text>
+      <g class="ctx-ordering"><rect x="640" y="70" width="150" height="40" rx="8" class="box"/><text x="715" y="95" class="tm mid">orders</text></g>
+      <g class="ctx-accent"><rect x="640" y="140" width="150" height="40" rx="8" class="box"/><text x="715" y="165" class="tm mid">outbox</text></g>
+      <g class="ctx-neutral"><rect x="640" y="210" width="150" height="40" rx="8" class="box"/><text x="715" y="235" class="tm mid">inbox (consumer, event_id)</text></g>
+      <text x="715" y="276" class="ts mid">1 transação por comando</text>
+
+      <path d="M790,160 H820 V75 H848" class="acc" marker-end="url(#ah2)"/>
+      <g class="ctx-accent">
+        <rect x="850" y="40" width="130" height="70" rx="10" class="box"/>
+        <text x="915" y="68" class="tc mid">Outbox relay</text>
+        <text x="915" y="88" class="ts mid">marca published_at</text>
+        <rect x="850" y="150" width="130" height="62" rx="10" class="box"/>
+        <text x="915" y="176" class="tc mid">EventPublisher</text>
+        <text x="915" y="195" class="ts mid">porta</text>
+      </g>
+      <path d="M915,110 V148" class="acc" marker-end="url(#ah2)"/>
+      <path d="M915,212 V246" class="acc" marker-end="url(#ah2)"/>
+      <rect x="850" y="248" width="130" height="42" rx="10" class="ext"/>
+      <text x="915" y="274" class="tm mid">aws · gcp · local</text>
+    </svg>
+  </div>
+</section>
+
+<!-- 7. Microfrontends -->
+<section id="mfe">
+  <header>
+    <div class="eyebrow">Frontend</div>
+    <h2>Microfrontends alinhados aos contextos</h2>
+    <p class="note">Os microfrontends vivem no repositório <code>portfolio</code>, que já usa Module Federation. Cada remote pertence a um bounded context e tem build próprio; o host do portfólio os compõe na rota <code>/projetos/lagoski</code>. Os MFEs não se importam entre si: conversam por eventos no navegador, como os serviços no backend. Sem o BFF no ar, o sistema inteiro roda simulado no navegador com o mesmo contrato.</p>
+  </header>
+  <div class="mfe-shell">
+    <div class="mfe-top">
+      <h3>portfolio (host) · React + Vite + Module Federation</h3>
+      <span class="note"><code>VITE_LAGOSKI_*_REMOTE_URL</code> → <code>remoteEntry.js</code> de cada app</span>
+    </div>
+    <div class="mfe-grid">
+      <div class="mfe ctx-catalog">
+        <h3>lagoski-catalog</h3>
+        <div class="own">dono: Catalog</div>
+        <p>Vitrine, detalhe da camiseta, escolha de tamanho e cor.</p>
+        <div class="routes">porta 5183</div>
+      </div>
+      <div class="mfe ctx-ordering">
+        <h3>lagoski-checkout</h3>
+        <div class="own">dono: Ordering + Payment</div>
+        <p>Carrinho, fechamento do pedido e pagamento no Stripe Checkout.</p>
+        <div class="routes">porta 5184</div>
+      </div>
+      <div class="mfe ctx-fulfillment">
+        <h3>lagoski-orders</h3>
+        <div class="own">dono: Ordering + Fulfillment</div>
+        <p>Meus pedidos, timeline e rastreio da entrega.</p>
+        <div class="routes">porta 5185</div>
+      </div>
+      <div class="mfe ctx-accent">
+        <h3>lagoski-inspector</h3>
+        <div class="own">dono: plataforma</div>
+        <p>Eventos ao vivo via SSE, saga por pedido, DLQs e painel de caos.</p>
+        <div class="routes">porta 5186</div>
+      </div>
+    </div>
+    <div class="busbar">
+      <strong>bus do navegador</strong>
+      <code>lagoski:cart-changed</code>
+      <code>lagoski:order-placed</code>
+      <code>lagoski:focus-order</code>
+      <span class="note">tipos em <code>packages/lagoski-contracts</code> · react como singleton</span>
+    </div>
+  </div>
+</section>
+
+<!-- 8. Terraform -->
+<section id="terraform">
+  <header>
+    <div class="eyebrow">Infraestrutura como código</div>
+    <h2>Cada serviço com seu Terraform</h2>
+    <p class="note">A plataforma cria a base e o catálogo de tópicos. Cada serviço cria só o que é dele (runtime, banco, filas, DLQs, assinaturas, IAM) a partir do <code>messaging.json</code> do próprio repositório, o mesmo arquivo que o código lê. Os módulos <code>aws-service</code> e <code>gcp-service</code> recebem as mesmas variáveis: Ports &amp; Adapters na infraestrutura.</p>
+  </header>
+  <div class="tf">
+    <div>
+      <div class="cap">lagoski-inventory/messaging.json</div>
+<pre class="code">{
+  "publishes": "inventory.events",
+  "subscriptions": [{
+    "topic": "ordering.events",
+    "event_types": [
+      "…order.placed.v1",
+      "…order.confirmed.v1",
+      "…order.cancelled.v1"
+    ]
+  }]
+}</pre>
+    </div>
+    <div class="arrow" aria-hidden="true">→</div>
+    <div class="stack">
+      <div class="mod"><span class="k">modules/aws-service</span><span class="note">ECS, ECR, SQS + DLQ, filtro SNS, IAM</span></div>
+      <div class="mod"><span class="k">modules/gcp-service</span><span class="note">Cloud Run, push subscription, dead-letter, IAM</span></div>
+    </div>
+    <div class="arrow" aria-hidden="true">→</div>
+    <div class="stack">
+      <div class="mod">
+        <span class="k">lagoski-platform</span>
+        <ul><li>VPC, ECS / Cloud Run, Postgres compartilhado</li><li>tópicos SNS / Pub/Sub (catálogo)</li><li>OIDC do GitHub / Workload Identity</li></ul>
+      </div>
+      <div class="mod">
+        <span class="k">terraform_remote_state</span>
+        <ul><li>saída <code>service_platform</code> = contrato</li><li>state por serviço e por ambiente</li><li>fmt, validate e tflint no CI</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9. Decisões -->
+<section id="decisoes">
+  <header>
+    <div class="eyebrow">ADRs</div>
+    <h2>Decisões principais</h2>
+  </header>
+  <dl class="adr">
+    <dt>Coreografia na saga</dt>
+    <dd>Expõe melhor o pub/sub e mantém os contextos autônomos. Custo: o fluxo fica distribuído, então o Event Inspector e o tracing passam a ser obrigatórios.</dd>
+    <dt>Um tópico por contexto</dt>
+    <dd>O contexto é dono do seu tópico (Open Host Service). Os consumidores escolhem o que recebem por filtro de <code>ce_type</code>, sem multiplicar tópicos por tipo de evento.</dd>
+    <dt>Outbox + Inbox</dt>
+    <dd>Garante publicação atômica com o estado e idempotência na entrada, sem 2PC.</dd>
+    <dt>Sem depender de ordem</dt>
+    <dd>SNS/SQS Standard e Pub/Sub não garantem ordem. Os handlers checam a transição de estado e compensam eventos tardios.</dd>
+    <dt>Push no GCP, pull na AWS</dt>
+    <dd>Cada nuvem usa seu modelo natural (Cloud Run pode escalar a zero). A porta <code>EventSubscriber</code> isola o domínio dessa diferença.</dd>
+    <dt>Stripe atrás de uma ACL</dt>
+    <dd>Stripe Checkout em sandbox com chave restrita, idempotency keys e webhook verificado. Nenhum tipo do SDK sai do adapter.</dd>
+    <dt>Tópicos na plataforma, filas no serviço</dt>
+    <dd>Evita dependência circular entre repositórios: qualquer serviço sobe em qualquer ordem depois da plataforma.</dd>
+    <dt>Banco único, databases separados</dt>
+    <dd>Concessão de custo para a demo. O isolamento lógico se mantém: cada serviço tem role e database próprios.</dd>
+  </dl>
+</section>
+
+</div>
+
+<script>
+(function () {
+  const clouds = {
+    aws: {
+      topicKind: "SNS Topic",
+      topicName: "lagoski-dev-ordering-events",
+      subKind: "SNS Subscription → SQS",
+      deliv: (q) => ["SQS Queue", q, "DLQ após 5 · long polling"],
+      capA: "filter_policy (SNS, escopo MessageAttributes)",
+      codeA: '{\n  "ce_type": [\n    "lagoski.ordering.order.placed.v1",\n    "lagoski.ordering.order.confirmed.v1",\n    "lagoski.ordering.order.cancelled.v1"\n  ]\n}',
+      capB: "redrive (SQS)",
+      codeB: 'redrive_policy = jsonencode({\n  deadLetterTargetArn = aws_sqs_queue.dlq[each.key].arn\n  maxReceiveCount     = 5\n})\nraw_message_delivery = true'
+    },
+    gcp: {
+      topicKind: "Pub/Sub Topic",
+      topicName: "lagoski-dev-ordering-events",
+      subKind: "Pub/Sub Subscription",
+      deliv: (q) => ["Push → Cloud Run", "/_events/pubsub", "OIDC · dead-letter após 5"],
+      capA: "filter (Pub/Sub subscription)",
+      codeA: 'attributes.ce_type = "lagoski.ordering.order.placed.v1"\n  OR attributes.ce_type = "lagoski.ordering.order.confirmed.v1"\n  OR attributes.ce_type = "lagoski.ordering.order.cancelled.v1"',
+      capB: "dead_letter_policy + retry_policy",
+      codeB: 'dead_letter_policy {\n  dead_letter_topic     = google_pubsub_topic.dlq[each.key].id\n  max_delivery_attempts = 5\n}\nretry_policy { minimum_backoff = "10s" maximum_backoff = "600s" }'
+    }
+  };
+  const rows = [
+    { y: 70, sub: "inventory.on-ordering", filter: "filtro: placed · confirmed · cancelled", consumer: "Inventory", ctx: "ctx-inventory", q: "inventory-on-ordering" },
+    { y: 190, sub: "payment.on-ordering", filter: "filtro: placed · cancelled", consumer: "Payment", ctx: "ctx-payment", q: "payment-on-ordering" },
+    { y: 310, sub: "bff.observer.ordering", filter: "sem filtro (recebe tudo)", consumer: "BFF", ctx: "ctx-neutral", q: "bff-observer-ordering" }
+  ];
+  const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  function svg(c) {
+    let out = '<svg viewBox="0 0 1000 380" role="img" aria-label="Topologia de mensageria do tópico ordering.events">' +
+      '<defs><marker id="ah3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="head"/></marker></defs>' +
+      '<g class="ctx-ordering"><rect x="20" y="150" width="170" height="80" rx="10" class="box"/>' +
+      '<text x="105" y="178" class="tc mid">Ordering</text><text x="105" y="197" class="ts mid">outbox relay</text><text x="105" y="214" class="ts mid">publish(ce_type, …)</text></g>' +
+      '<path d="M190,190 H238" class="ln" marker-end="url(#ah3)"/>' +
+      '<g class="ctx-accent"><rect x="240" y="140" width="170" height="100" rx="10" class="box"/>' +
+      '<text x="325" y="170" class="tc mid">' + esc(c.topicKind) + '</text><text x="325" y="192" class="tm mid">' + esc(c.topicName) + '</text>' +
+      '<text x="325" y="214" class="ts mid">ce_type · ce_id · traceparent</text></g>';
+    rows.forEach((r) => {
+      const d = c.deliv(r.q);
+      out += '<path d="M410,190 C436,190 432,' + r.y + ' 458,' + r.y + '" class="acc" marker-end="url(#ah3)"/>' +
+        '<g class="ctx-neutral"><rect x="460" y="' + (r.y - 40) + '" width="230" height="80" rx="10" class="box"/></g>' +
+        '<text x="575" y="' + (r.y - 16) + '" class="ts mid">' + esc(c.subKind) + '</text>' +
+        '<text x="575" y="' + (r.y + 4) + '" class="tm mid">' + esc(r.sub) + '</text>' +
+        '<text x="575" y="' + (r.y + 24) + '" class="ts mid">' + esc(r.filter) + '</text>' +
+        '<path d="M690,' + r.y + ' H718" class="ln" marker-end="url(#ah3)"/>' +
+        '<g class="ctx-neutral"><rect x="720" y="' + (r.y - 40) + '" width="150" height="80" rx="10" class="box"/></g>' +
+        '<text x="795" y="' + (r.y - 16) + '" class="t mid">' + esc(d[0]) + '</text>' +
+        '<text x="795" y="' + (r.y + 4) + '" class="tm mid" style="font-size:10.5px">' + esc(d[1]) + '</text>' +
+        '<text x="795" y="' + (r.y + 24) + '" class="ts mid">' + esc(d[2]) + '</text>' +
+        '<path d="M870,' + r.y + ' H893" class="ln" marker-end="url(#ah3)"/>' +
+        '<g class="' + r.ctx + '"><rect x="895" y="' + (r.y - 30) + '" width="85" height="60" rx="10" class="box"/>' +
+        '<text x="937.5" y="' + (r.y + 5) + '" class="tc mid">' + esc(r.consumer) + '</text></g>';
+    });
+    return out + '</svg>';
+  }
+  const tabs = document.querySelectorAll('[data-cloud]');
+  const panel = document.getElementById('cloud-panel');
+  function show(key) {
+    const c = clouds[key];
+    document.getElementById('cloud-svg').innerHTML = svg(c);
+    document.getElementById('cloud-cap-a').textContent = c.capA;
+    document.getElementById('cloud-code-a').textContent = c.codeA;
+    document.getElementById('cloud-cap-b').textContent = c.capB;
+    document.getElementById('cloud-code-b').textContent = c.codeB;
+    tabs.forEach((t) => t.setAttribute('aria-selected', String(t.dataset.cloud === key)));
+    panel.setAttribute('aria-labelledby', 'tab-' + key);
+  }
+  tabs.forEach((t) => t.addEventListener('click', () => show(t.dataset.cloud)));
+  show('aws');
+})();
+</script>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs';
+  const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+  mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'neutral', fontFamily: 'IBM Plex Sans, system-ui, sans-serif' });
+  await mermaid.run({ querySelector: 'pre.mermaid' });
+</script>
+</body>
+</html>

@@ -41,4 +41,19 @@ export const projects: Project[] = [
     repo: 'https://github.com/wesleyplago/rag-eval-harness',
     demoPath: '/projetos/rag',
   },
+  {
+    slug: 'lagoski',
+    name: 'Lagoski',
+    tagline: 'Bounded contexts em microsserviços orientados a eventos, na AWS e no GCP',
+    description:
+      'Uma loja de camisetas dividida em seis bounded contexts que só conversam por eventos: SNS + SQS na AWS, Pub/Sub no GCP, com o mesmo código. Cada serviço tem repositório e Terraform próprios, e o pagamento usa o Stripe atrás de uma Anti-Corruption Layer.',
+    stack: ['TypeScript', 'Fastify', 'Postgres', 'SNS/SQS', 'Pub/Sub', 'Terraform', 'Stripe', 'Module Federation'],
+    highlights: [
+      'Saga por coreografia com outbox, inbox idempotente, retry e DLQ',
+      'Mesma imagem na AWS (pull) e no GCP (push), escolhida por configuração',
+      'Quatro microfrontends, um por contexto, e um Event Inspector ao vivo',
+    ],
+    repo: 'https://github.com/wesleyplago/lagoski-platform',
+    demoPath: '/projetos/lagoski',
+  },
 ];

@@ -5,6 +5,7 @@ import { Results } from './components/Results';
 import { SearchPanel } from './components/SearchPanel';
 import { FIXTURE_CHUNKS } from '@portfolio/rag-contracts';
 import { connect, fallbackToMock, type Connection } from './connect';
+import { fonts } from './fonts';
 import { css } from './styles';
 import { useRag } from './useRag';
 
@@ -28,7 +29,7 @@ export default function RagApp() {
 
   return (
     <div className="rag">
-      <style>{css}</style>
+      <style>{fonts + css}</style>
       {connection ? (
         // A key recria o estado quando a conexão troca (API → mock).
         <Console
@@ -54,7 +55,7 @@ function Console({ connection, onUseMock }: { connection: Connection; onUseMock:
     <>
       <header className="rg-top">
         <div className="rg-brand">
-          <div className="rg-logo">R</div>
+          <span className="rg-wordmark" aria-hidden="true">rag/eval</span>
           <div>
             <h2>RAG sobre regulação de pagamentos</h2>
             <div className="rg-sub">Busca híbrida (BM25 + dense + RRF) com router de identificadores e abstenção</div>

@@ -376,6 +376,18 @@ importers:
 
   apps/rag:
     dependencies:
+      '@fontsource-variable/funnel-display':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource-variable/funnel-sans':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/dm-mono':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@portfolio/brands':
+        specifier: workspace:*
+        version: link:../../packages/brands
       '@portfolio/rag-contracts':
         specifier: workspace:*
         version: link:../../packages/rag-contracts
@@ -789,6 +801,15 @@ packages:
 
   '@fontsource-variable/chivo@5.3.0':
     resolution: {integrity: sha512-lbYs65CyAE3RDvZjiFSt2HYF/cPl/2wB3RSBzSlRqPxYw5uqA/Ux/Wa/BuDEKo72NXmiR9F5ba8FXqJnooRhSA==}
+
+  '@fontsource-variable/funnel-display@5.3.0':
+    resolution: {integrity: sha512-o/12lyrfflx5QAQFa+hAl0uBeWoBUAm5w71j+KssBseo++XJT3tnveDSg5IAnAdiclQHfFuEZiL5Wn2BjuFxtw==}
+
+  '@fontsource-variable/funnel-sans@5.3.0':
+    resolution: {integrity: sha512-NOgHy3KWMAJdl33XSESit33nI8vlFZh8/0E3tLD7z5jJA5gQoLeUkFcZtxehVVkyYpAZ747tF8O/kAHXXa96ZA==}
+
+  '@fontsource/dm-mono@5.3.0':
+    resolution: {integrity: sha512-OINjI8C1S/wpchhQxl7njZdMn4+hnDCpQ4YtvvOpKNARo+0J8O1x1IcrChxNjHOhfVv1by8C/FQoy3hXK+C1Ug==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -1722,6 +1743,12 @@ snapshots:
   '@fontsource-variable/chivo-mono@5.3.0': {}
 
   '@fontsource-variable/chivo@5.3.0': {}
+
+  '@fontsource-variable/funnel-display@5.3.0': {}
+
+  '@fontsource-variable/funnel-sans@5.3.0': {}
+
+  '@fontsource/dm-mono@5.3.0': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:

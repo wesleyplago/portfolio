@@ -75,7 +75,7 @@ test.describe('navegação do portfólio', () => {
 
   test('páginas sem microfrontend não buscam nenhum remote e não quebram com eles fora do ar', async ({ page }) => {
     const remoteHits: string[] = [];
-    await page.route(/localhost:528[1-6]\//, (route) => {
+    await page.route(/localhost:528[1-7]\//, (route) => {
       remoteHits.push(route.request().url());
       return route.abort();
     });

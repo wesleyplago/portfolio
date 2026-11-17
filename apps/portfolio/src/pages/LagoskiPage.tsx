@@ -39,7 +39,7 @@ export function LagoskiPage() {
           <p className="lead">{project.description}</p>
         </div>
         <div className="lagoski-links">
-          <a href="/lagoski/arquitetura.html" className="btn">
+          <a href={`${import.meta.env.BASE_URL}lagoski/arquitetura.html`} className="btn">
             Arquitetura
           </a>
           <a href={project.repo} className="btn" target="_blank" rel="noreferrer">

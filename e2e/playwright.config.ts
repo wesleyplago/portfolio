@@ -21,6 +21,10 @@ export const RAG_URL = `http://localhost:${RAG_PORT}`;
 export const LAGOSKI = { catalog: 5283, checkout: 5284, orders: 5285, inspector: 5286 } as const;
 const lagoskiUrl = (name: keyof typeof LAGOSKI) => `http://localhost:${LAGOSKI[name]}`;
 
+// Vitrine de afiliados em modo mock (sem VITE_VITRINE_API_URL): admin fixo do modo demo.
+const VITRINE_PORT = 5287;
+export const VITRINE_URL = `http://localhost:${VITRINE_PORT}`;
+
 const mockPayOpsEnv = {
   VITE_PAYOPS_API_URL: '',
   VITE_PAYOPS_AGENT_KEY: '',
@@ -76,6 +80,14 @@ export default defineConfig({
       timeout: 120_000,
     })),
     {
+      command: `pnpm --filter @portfolio/vitrine build && pnpm --filter @portfolio/vitrine exec vite preview --port ${VITRINE_PORT} --strictPort`,
+      cwd: '..',
+      url: `${VITRINE_URL}/remoteEntry.js`,
+      env: { VITE_VITRINE_API_URL: '', VITRINE_PORT: String(VITRINE_PORT) },
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+    {
       command: `pnpm --filter @portfolio/shell build && pnpm --filter @portfolio/shell exec vite preview --port ${HOST_PORT} --strictPort`,
       cwd: '..',
       url: HOST_URL,
@@ -87,6 +99,7 @@ export default defineConfig({
         VITE_LAGOSKI_CHECKOUT_REMOTE_URL: `${lagoskiUrl('checkout')}/remoteEntry.js`,
         VITE_LAGOSKI_ORDERS_REMOTE_URL: `${lagoskiUrl('orders')}/remoteEntry.js`,
         VITE_LAGOSKI_INSPECTOR_REMOTE_URL: `${lagoskiUrl('inspector')}/remoteEntry.js`,
+        VITE_VITRINE_REMOTE_URL: `${VITRINE_URL}/remoteEntry.js`,
       },
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,

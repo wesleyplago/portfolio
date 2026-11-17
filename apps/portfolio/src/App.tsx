@@ -3,6 +3,7 @@ import { profile } from './content/profile';
 import { Home } from './pages/Home';
 import { PayOpsPage } from './pages/PayOpsPage';
 import { RagPage } from './pages/RagPage';
+import { VitrinePage } from './pages/VitrinePage';
 import { LagoskiPage } from './pages/LagoskiPage';
 import { NotFound } from './pages/NotFound';
 
@@ -18,6 +19,7 @@ export default function App() {
           <NavLink to="/" end>Início</NavLink>
           <NavLink to="/projetos/payops">PayOps ao vivo</NavLink>
           <NavLink to="/projetos/rag">RAG ao vivo</NavLink>
+          <NavLink to="/projetos/vitrine">Vitrine ao vivo</NavLink>
           <NavLink to="/projetos/lagoski">Lagoski ao vivo</NavLink>
           {profile.links.map((l) => (
             <a key={l.href} href={l.href} target="_blank" rel="noreferrer">
@@ -31,6 +33,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/projetos/payops" element={<PayOpsPage />} />
           <Route path="/projetos/rag" element={<RagPage />} />
+          <Route path="/projetos/vitrine" element={<VitrinePage />} />
           <Route path="/projetos/lagoski" element={<LagoskiPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

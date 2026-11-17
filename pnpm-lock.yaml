@@ -399,6 +399,37 @@ importers:
         specifier: ^7.2.2
         version: 7.3.8(@types/node@22.20.5)
 
+  apps/vitrine:
+    dependencies:
+      '@portfolio/vitrine-contracts':
+        specifier: workspace:*
+        version: link:../../packages/vitrine-contracts
+      react:
+        specifier: ^19.2.0
+        version: 19.3.1
+      react-dom:
+        specifier: ^19.2.0
+        version: 19.3.1(react@19.3.1)
+    devDependencies:
+      '@module-federation/vite':
+        specifier: ^1.24.1
+        version: 1.24.1(typescript@5.9.3)(vite@7.3.8(@types/node@22.20.5))
+      '@types/react':
+        specifier: ^19.2.2
+        version: 19.3.0
+      '@types/react-dom':
+        specifier: ^19.2.2
+        version: 19.3.0(@types/react@19.3.0)
+      '@vitejs/plugin-react':
+        specifier: ^5.1.0
+        version: 5.2.0(supports-color@8.1.1)(vite@7.3.8(@types/node@22.20.5))
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+      vite:
+        specifier: ^7.2.2
+        version: 7.3.8(@types/node@22.20.5)
+
   e2e:
     devDependencies:
       '@axe-core/playwright':
@@ -441,6 +472,19 @@ importers:
         version: 3.2.7(@types/node@22.20.5)(supports-color@8.1.1)
 
   packages/rag-contracts:
+    dependencies:
+      zod:
+        specifier: ^4.1.12
+        version: 4.6.7
+    devDependencies:
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.7(@types/node@22.20.5)(supports-color@8.1.1)
+
+  packages/vitrine-contracts:
     dependencies:
       zod:
         specifier: ^4.1.12

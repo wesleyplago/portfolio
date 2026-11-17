@@ -11,6 +11,12 @@ declare module 'rag/App' {
   export default RagApp;
 }
 
+declare module 'vitrine/App' {
+  import type { ComponentType } from 'react';
+  const VitrineApp: ComponentType;
+  export default VitrineApp;
+}
+
 declare module 'lagoskiCatalog/App' {
   import type { ComponentType } from 'react';
   const LagoskiCatalogApp: ComponentType;

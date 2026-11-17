@@ -1,0 +1,21 @@
+{
+  "name": "@portfolio/vitrine-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Contrato tipado (Zod), cliente HTTP e mock da API da vitrine de afiliados (vitrine-api).",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

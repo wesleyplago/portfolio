@@ -239,3 +239,11 @@ test.describe('isolamento do microfrontend', () => {
     await payops.expectBalance('Card revenue', 0);
   });
 });
+
+test('PayOps usa a marca própria mesmo com o sistema em modo escuro', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.goto('/projetos/payops');
+  const root = new PayOps(page).root;
+  await expect(root).toHaveCSS('background-color', 'rgb(247, 249, 250)');
+  await expect(root).toHaveCSS('font-family', /Chivo/);
+});

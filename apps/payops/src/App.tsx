@@ -51,7 +51,7 @@ function Console({ connection }: { connection: Connection }) {
 
       <header className="po-top">
         <div className="po-brand">
-          <div className="po-logo">P</div>
+          <div className="po-logo" aria-hidden="true">PO</div>
           <div>
             <h2>PayOps Console</h2>
             <div className="po-sub">Agente de pagamentos com raio de explosão controlado</div>

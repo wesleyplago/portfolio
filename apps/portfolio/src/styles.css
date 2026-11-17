@@ -84,12 +84,11 @@ h3 { font-size: 19px; }
   .lagoski-layout { grid-template-columns: minmax(0, 1fr); }
   .lagoski-layout .lagoski-side { position: static; }
 }
-.lagoski-links { display: flex; gap: 10px; flex-wrap: wrap; }
 
-/* Página de projeto: capa na marca do app (variáveis --brand-* vêm inline do ProjectPage) */
+/* Página de projeto: capa na marca do app (variáveis --brand-* vêm inline do ProjectPage).
+   A capa usa só as cores da marca: aplicar --brand-font faria o host baixar as fontes dos remotes (uma vez por @font-face duplicado). */
 .project-page { display: grid; gap: 28px; padding: 16px 0 48px; }
-.cover { background: var(--brand-bg); color: var(--brand-ink); font-family: var(--brand-font); border-radius: 16px; padding: clamp(24px, 5vw, 56px); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px; align-items: end; }
-.cover h1 { font-family: inherit; }
+.cover { background: var(--brand-bg); color: var(--brand-ink); border-radius: 16px; padding: clamp(24px, 5vw, 56px); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px; align-items: end; }
 .cover-tagline { color: var(--brand-muted); font-size: 18px; margin: 12px 0 0; max-width: 560px; }
 .cover-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
 .cover-btn { display: inline-flex; align-items: center; padding: 10px 18px; border-radius: 8px; border: 1px solid var(--brand-border); color: var(--brand-ink); text-decoration: none; font-weight: 600; font-size: 15px; }

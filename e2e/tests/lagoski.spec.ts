@@ -92,9 +92,7 @@ test.describe('Lagoski (microfrontends + barramento simulado)', () => {
     console.log('woff2 por família:', JSON.stringify(counts), woff.map((u) => u.replace(/^https?:\/\//, '')));
     // Cada remote injeta o próprio @font-face (URL de origem diferente), então o Hanken, comum aos quatro,
     // baixa uma vez por remote. Newsreader (3 remotes) e JetBrains Mono (1) saem uma vez. Guarda contra piora.
-    // A capa do host (Task 7) usa a pilha Newsreader antes dos remotes montarem; cada @font-face injetado
-    // com a mesma família reaproveitada pela capa dispara um download, então Newsreader sobe de 1 para 3.
-    const max: Record<string, number> = { Newsreader: 3, 'Hanken Grotesk': 4, 'JetBrains Mono': 1 };
+    const max: Record<string, number> = { Newsreader: 1, 'Hanken Grotesk': 4, 'JetBrains Mono': 1 };
     for (const [name, n] of Object.entries(counts)) expect(n, `downloads de ${name}`).toBeLessThanOrEqual(max[name] ?? 0);
     if ((counts['Hanken Grotesk'] ?? 0) > 1) test.info().annotations.push({ type: 'duplicado', description: `Hanken Grotesk x${counts['Hanken Grotesk']}` });
   });

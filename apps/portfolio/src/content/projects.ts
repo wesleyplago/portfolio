@@ -86,7 +86,7 @@ export const projects: Project[] = [
       'Vitrine de ofertas da Shopee e do Mercado Livre com links de afiliado, e um backoffice para cadastrar produtos e acompanhar cliques e pedidos.',
     stack: ['TypeScript', 'React', 'Module Federation'],
     highlights: [
-      'Ofertas de dois marketplaces na mesma vitrine, com busca e filtro por loja',
+      'Ofertas de dois marketplaces na mesma vitrine',
       'Backoffice com login de admin para cadastrar produtos',
       'Cliques e pedidos acompanhados no painel',
     ],

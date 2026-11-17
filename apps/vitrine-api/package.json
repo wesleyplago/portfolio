@@ -1,0 +1,23 @@
+{
+  "name": "@portfolio/vitrine-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Backend mínimo da vitrine de afiliados: contrato da vitrine-api em memória e coleta dos dados do anúncio na API oficial do Mercado Livre.",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@portfolio/vitrine-contracts": "workspace:*",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "tsx": "^4.20.6",
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

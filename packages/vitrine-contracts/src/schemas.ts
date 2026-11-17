@@ -79,14 +79,22 @@ export const AddShopeeInputSchema = z.object({
 });
 export type AddShopeeInput = z.infer<typeof AddShopeeInputSchema>;
 
+/** Cadastro do ML: só o link de afiliado; a vitrine-api coleta o resto na API oficial. */
 export const AddMercadoLivreInputSchema = z.object({
-  itemUrl: z.url('Cole a URL do anúncio no Mercado Livre'),
   affiliateUrl: z.url('Cole o link gerado no portal de afiliados'),
-  title: z.string().trim().min(3, 'Título com pelo menos 3 caracteres').max(120),
-  category: z.string().trim().min(1, 'Informe a categoria'),
-  priceTo: z.number().positive('Preço maior que zero'),
 });
 export type AddMercadoLivreInput = z.infer<typeof AddMercadoLivreInputSchema>;
+
+/** Dados do anúncio coletados a partir do link de afiliado. */
+export const MercadoLivreItemSchema = z.object({
+  itemId: z.string().regex(/^MLB\d+$/),
+  title: z.string().trim().min(1),
+  category: z.string().trim().min(1),
+  imageUrl: z.url().nullable(),
+  priceFrom: z.number().positive().nullable(),
+  priceTo: z.number().positive(),
+});
+export type MercadoLivreItem = z.infer<typeof MercadoLivreItemSchema>;
 
 export const FunnelRowSchema = z.object({
   productId: z.string(),

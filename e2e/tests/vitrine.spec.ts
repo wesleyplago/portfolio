@@ -207,56 +207,48 @@ test.describe('backoffice', () => {
     await expect(v.card('Tênis de corrida')).toHaveCount(0);
   });
 
-  test('cadastro do Mercado Livre recusa link fora da loja e salva como rascunho', async ({ page }) => {
+  test('cadastro do Mercado Livre pede só o link e coleta o resto do anúncio', async ({ page }) => {
     const v = new Vitrine(page);
     await v.open();
     await v.loginOk();
     const form = v.form('Adicionar do Mercado Livre');
-    const save = form.getByRole('button', { name: 'Salvar como rascunho' });
+    const link = form.getByLabel('Link de afiliado');
+    const save = form.getByRole('button', { name: 'Importar como rascunho' });
+
+    // Um único campo: título, preço, foto e categoria vêm do anúncio.
+    await expect(form.getByRole('textbox')).toHaveCount(1);
     await expect(save).toBeDisabled();
 
-    await form.getByLabel('URL do anúncio').fill('https://www.mercadolivre.com.br/');
-    await form.getByLabel('Link de afiliado').fill('https://mercadolivre.com/sec/1abcDE');
-    await form.getByLabel('Título').fill('Mouse sem fio');
-    await form.getByLabel('Categoria').fill('Informática');
-    await form.getByLabel('Preço (R$)').fill('1.299,90');
-    await save.click();
-    await expect(form.locator('.vt-error')).toHaveText(/anúncio específico/);
-
-    await form.getByLabel('URL do anúncio').fill('https://produto.mercadolivre.com.br/MLB-1234567890-mouse-sem-fio-_JM');
-    await form.getByLabel('Link de afiliado').fill('https://bit.ly/3abc');
+    await link.fill('https://bit.ly/3abc');
     await save.click();
     await expect(form.locator('.vt-error')).toHaveText(/domínio da loja/);
 
-    await form.getByLabel('Link de afiliado').fill('https://mercadolivre.com/sec/1abcDE');
-    await save.click();
+    const url = 'https://produto.mercadolivre.com.br/MLB-1234567890-mouse-sem-fio-_JM';
+    await link.fill(url);
+    await link.press('Enter');
     await expect(form.locator('.vt-error')).toHaveCount(0);
     await expect(v.row('Mouse sem fio')).toContainText('Rascunho');
-    await expect(v.row('Mouse sem fio')).toContainText(/R\$\s1\.299,90/);
-    await expect(form.getByLabel('Título')).toHaveValue('');
+    await expect(v.row('Mouse sem fio')).toContainText(/R\$\s99,90/);
+    await expect(link).toHaveValue('');
 
-    // Rascunho não aparece na vitrine até ser publicado.
+    // Rascunho não aparece na vitrine; publicado, o botão Comprar usa o link como veio.
     await v.goTab('Vitrine');
     await expect(v.card('Mouse sem fio')).toHaveCount(0);
+    await v.goTab('Backoffice');
+    await v.row('Mouse sem fio').getByRole('button', { name: 'Publicar Mouse sem fio' }).click();
+    await expect(v.row('Mouse sem fio')).toContainText('Publicado');
+    await v.goTab('Vitrine');
+    await expect(v.card('Mouse sem fio').getByRole('link', { name: 'Comprar no Mercado Livre' })).toHaveAttribute('href', url);
   });
 
-  test('cadastro do Mercado Livre explica campos inválidos em português', async ({ page }) => {
+  test('cadastro do Mercado Livre explica link inválido em português', async ({ page }) => {
     const v = new Vitrine(page);
     await v.open();
     await v.loginOk();
     const form = v.form('Adicionar do Mercado Livre');
-    await form.getByLabel('URL do anúncio').fill('https://produto.mercadolivre.com.br/MLB-1234567890-x');
-    await form.getByLabel('Link de afiliado').fill('https://mercadolivre.com/sec/1abcDE');
-    await form.getByLabel('Título').fill('Mo');
-    await form.getByLabel('Categoria').fill('Informática');
-    await form.getByLabel('Preço (R$)').fill('10');
-    await form.getByRole('button', { name: 'Salvar como rascunho' }).click();
-    await expect(form.locator('.vt-error')).toHaveText('Título com pelo menos 3 caracteres');
-
-    await form.getByLabel('Título').fill('Mouse');
-    await form.getByLabel('Preço (R$)').fill('abc');
-    await form.getByRole('button', { name: 'Salvar como rascunho' }).click();
-    await expect(form.locator('.vt-error')).toHaveText('Preço maior que zero');
+    await form.getByLabel('Link de afiliado').fill('mouse sem fio');
+    await form.getByRole('button', { name: 'Importar como rascunho' }).click();
+    await expect(form.locator('.vt-error')).toHaveText('Cole o link gerado no portal de afiliados');
   });
 
   test('importação da Shopee recusa outro domínio e cria rascunho', async ({ page }) => {

@@ -29,7 +29,7 @@ export const LINK_PROBLEM_MESSAGE: Record<LinkProblem, string> = {
   INVALID_URL: 'Não é uma URL válida.',
   NOT_HTTPS: 'O link precisa começar com https://.',
   NOT_STORE_DOMAIN: 'O link precisa ser do domínio da loja. Encurtadores e redirecionadores não geram comissão.',
-  NOT_A_PRODUCT: 'Use a URL de um anúncio específico (com o código MLB), não a home nem uma busca.',
+  NOT_A_PRODUCT: 'O link não leva a um anúncio específico. Gere o link na página do produto, não na home nem numa busca.',
 };
 
 const isStoreHost = (store: Store, host: string) =>
@@ -48,9 +48,35 @@ export function checkAffiliateLink(store: Store, url: string): LinkProblem | nul
   return null;
 }
 
-/** URL do anúncio no ML: precisa ter o código MLB do item. */
-export function checkMercadoLivreItemUrl(url: string): LinkProblem | null {
-  const problem = checkAffiliateLink('mercadolivre', url);
-  if (problem) return problem;
-  return /MLB-?\d{6,}/i.test(url) ? null : 'NOT_A_PRODUCT';
+export type MercadoLivreRef = { kind: 'item' | 'product'; id: string };
+
+/**
+ * Código do anúncio dentro de uma URL do ML, quando ele está nela. O link curto
+ * do gerador (mercadolivre.com/sec/…) não traz o código: a vitrine-api segue o
+ * redirecionamento até a página do anúncio e chama esta função de novo.
+ *
+ * - `?wid=MLB123` ou `item_id:MLB123` (filtro da página de catálogo) → item;
+ * - `/p/MLB123` → produto de catálogo (a API diz qual item ganha a compra);
+ * - `MLB-123` no caminho (produto.mercadolivre.com.br/MLB-123-titulo) → item.
+ */
+export function mercadoLivreIdFromUrl(url: string): MercadoLivreRef | null {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return null;
+  }
+  const raw = `${parsed.search}${parsed.hash}`;
+  let extra = raw;
+  try {
+    extra = decodeURIComponent(raw);
+  } catch {
+    // %-escape inválido: procura o código no texto como veio.
+  }
+  const wid = /(?:[?&#]wid=|item_id:)MLB-?(\d{6,})/i.exec(extra);
+  if (wid) return { kind: 'item', id: `MLB${wid[1]}` };
+  const catalog = /\/p\/MLB-?(\d{6,})/i.exec(parsed.pathname);
+  if (catalog) return { kind: 'product', id: `MLB${catalog[1]}` };
+  const item = /MLB-?(\d{6,})/i.exec(parsed.pathname);
+  return item ? { kind: 'item', id: `MLB${item[1]}` } : null;
 }

@@ -109,7 +109,5 @@ export const css = `
 .vt-status.draft { background: var(--vt-accent-soft); color: var(--vt-muted); }
 
 .vt-forms { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-.vt-row { display: grid; gap: 8px; grid-template-columns: 2fr 1.4fr 1fr; }
-.vt-row > div { display: grid; gap: 4px; min-width: 0; }
-@media (max-width: 520px) { .vt { padding: 14px; } .vt-row { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .vt { padding: 14px; } }
 `;

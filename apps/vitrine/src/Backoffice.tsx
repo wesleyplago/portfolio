@@ -8,7 +8,7 @@ import {
   type Session,
   type VitrineClient,
 } from '@portfolio/vitrine-contracts';
-import { errorMessage, money, parsePrice, percent } from './format';
+import { errorMessage, money, percent } from './format';
 
 type BackofficeProps = {
   client: VitrineClient;
@@ -277,46 +277,31 @@ function AddShopee({ client, token, ...rest }: FormProps) {
 }
 
 function AddMercadoLivre({ client, token, ...rest }: FormProps) {
-  const empty = { itemUrl: '', affiliateUrl: '', title: '', category: '', priceTo: '' };
-  const [form, setForm] = useState(empty);
+  const [affiliateUrl, setAffiliateUrl] = useState('');
   const { error, busy, run } = useSubmit(rest);
-  const set = (key: keyof typeof empty) => (e: { target: { value: string } }) =>
-    setForm((f) => ({ ...f, [key]: e.target.value }));
-
   return (
     <form
       className="vt-panel"
       onSubmit={(e) => {
         e.preventDefault();
-        void run(
-          () => client.admin.addMercadoLivre(token, { ...form, priceTo: parsePrice(form.priceTo) }),
-          () => setForm(empty),
-        );
+        void run(() => client.admin.addMercadoLivre(token, { affiliateUrl }), () => setAffiliateUrl(''));
       }}
     >
       <h2>Adicionar do Mercado Livre</h2>
-      <p className="vt-hint">Gere o link no portal de afiliados do ML (Ferramentas → Gerador de link) e cole aqui.</p>
-      <label htmlFor="vt-ml-item">URL do anúncio</label>
-      <input id="vt-ml-item" placeholder="https://produto.mercadolivre.com.br/MLB-…" value={form.itemUrl} onChange={set('itemUrl')} />
+      <p className="vt-hint">
+        Gere o link no portal de afiliados do ML (Ferramentas → Gerador de link) e cole aqui. Título, preço, foto e
+        categoria vêm do anúncio.
+      </p>
       <label htmlFor="vt-ml-link">Link de afiliado</label>
-      <input id="vt-ml-link" placeholder="https://mercadolivre.com/sec/…" value={form.affiliateUrl} onChange={set('affiliateUrl')} />
-      <div className="vt-row">
-        <div>
-          <label htmlFor="vt-ml-title">Título</label>
-          <input id="vt-ml-title" value={form.title} onChange={set('title')} />
-        </div>
-        <div>
-          <label htmlFor="vt-ml-cat">Categoria</label>
-          <input id="vt-ml-cat" value={form.category} onChange={set('category')} />
-        </div>
-        <div>
-          <label htmlFor="vt-ml-price">Preço (R$)</label>
-          <input id="vt-ml-price" inputMode="decimal" value={form.priceTo} onChange={set('priceTo')} />
-        </div>
-      </div>
+      <input
+        id="vt-ml-link"
+        placeholder="https://mercadolivre.com/sec/…"
+        value={affiliateUrl}
+        onChange={(e) => setAffiliateUrl(e.target.value)}
+      />
       {error && <p className="vt-error">{error}</p>}
-      <button className="vt-primary" type="submit" disabled={busy || !form.itemUrl || !form.affiliateUrl}>
-        Salvar como rascunho
+      <button className="vt-primary" type="submit" disabled={busy || !affiliateUrl}>
+        {busy ? 'Buscando dados do anúncio…' : 'Importar como rascunho'}
       </button>
     </form>
   );

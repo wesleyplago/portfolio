@@ -13,12 +13,13 @@
  * lojas, sem ID de afiliado. O estado vive na aba e some ao recarregar.
  */
 import { VitrineApiError, type VitrineClient } from './client';
-import { checkAffiliateLink, checkMercadoLivreItemUrl, LINK_PROBLEM_MESSAGE } from './link-rules';
+import { checkAffiliateLink, LINK_PROBLEM_MESSAGE, mercadoLivreIdFromUrl } from './link-rules';
 import {
   AddMercadoLivreInputSchema,
   AddShopeeInputSchema,
   LoginRequestSchema,
   ProductQuerySchema,
+  type MercadoLivreItem,
   type Product,
   type ProductPage,
   type Session,
@@ -65,7 +66,41 @@ export const EXAMPLE_PRODUCTS: readonly Seed[] = [
   }),
 ];
 
-export type MockVitrineOptions = { latencyMs?: number };
+/** Coleta os dados do anúncio a partir do link de afiliado (já validado no domínio do ML). */
+export type MercadoLivreLookup = (affiliateUrl: string) => Promise<MercadoLivreItem>;
+
+export type MockVitrineOptions = {
+  latencyMs?: number;
+  /** Padrão: dados de exemplo. A vitrine-api injeta a busca real na API do ML. */
+  mercadoLivre?: MercadoLivreLookup;
+  /** Padrão: true. A vitrine-api começa sem os produtos de exemplo. */
+  examples?: boolean;
+  /** Padrão: DEMO_ADMIN. A vitrine-api lê do ambiente. */
+  admin?: { username: string; password: string };
+};
+
+/**
+ * Busca simulada do modo demo: não chama o ML. Tira o título do caminho da URL
+ * quando ele está lá (produto.mercadolivre.com.br/MLB-123-mouse-sem-fio-_JM);
+ * o link curto /sec/ não tem título, então vira um nome genérico.
+ */
+export const demoMercadoLivreLookup: MercadoLivreLookup = async (affiliateUrl) => {
+  const ref = mercadoLivreIdFromUrl(affiliateUrl);
+  const slug = new URL(affiliateUrl).pathname
+    .replace(/^.*MLB-?\d+-?/i, '')
+    .replace(/-_J[MP].*$/i, '')
+    .replace(/[-_]+/g, ' ')
+    .trim();
+  const name = ref && slug.length >= 3 ? slug.charAt(0).toUpperCase() + slug.slice(1) : 'Produto do Mercado Livre (exemplo)';
+  return {
+    itemId: ref?.id ?? 'MLB1000000001',
+    title: name,
+    category: 'Sem categoria',
+    imageUrl: null,
+    priceFrom: 129.9,
+    priceTo: 99.9,
+  };
+};
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const strip = ({ exampleOrders: _orders, ...product }: Seed): Product => product;
@@ -76,7 +111,10 @@ const invalid = (message: string) => new VitrineApiError('VALIDATION_ERROR', mes
 
 export function createMockVitrineClient(options: MockVitrineOptions = {}): VitrineClient {
   const latency = options.latencyMs ?? 150;
-  const products: Seed[] = EXAMPLE_PRODUCTS.map((p) => ({ ...p, links: [...p.links] }));
+  const lookupMercadoLivre = options.mercadoLivre ?? demoMercadoLivreLookup;
+  const admin = options.admin ?? DEMO_ADMIN;
+  const products: Seed[] =
+    options.examples === false ? [] : EXAMPLE_PRODUCTS.map((p) => ({ ...p, links: [...p.links] }));
   const clicks = new Map<string, number>();
   const sessions = new Map<string, Session>();
   let nextId = products.length + 1;
@@ -89,9 +127,11 @@ export function createMockVitrineClient(options: MockVitrineOptions = {}): Vitri
     }
   };
   const page = (items: Seed[]): ProductPage => ({ items: items.map(strip), total: items.length });
-  const add = (p: Omit<Seed, 'id' | 'slug' | 'status' | 'exampleOrders' | 'imageUrl'>): Product => {
+  const add = (
+    p: Omit<Seed, 'id' | 'slug' | 'status' | 'exampleOrders' | 'imageUrl'> & { imageUrl?: string | null },
+  ): Product => {
     const id = `p${nextId++}`;
-    const product: Seed = { ...p, id, slug: `${slugify(p.title)}-${id}`, status: 'draft', imageUrl: null, exampleOrders: 0 };
+    const product: Seed = { imageUrl: null, ...p, id, slug: `${slugify(p.title)}-${id}`, status: 'draft', exampleOrders: 0 };
     products.unshift(product);
     return strip(product);
   };
@@ -132,7 +172,7 @@ export function createMockVitrineClient(options: MockVitrineOptions = {}): Vitri
     async login(input) {
       await sleep(latency);
       const { username, password } = LoginRequestSchema.parse(input);
-      if (username !== DEMO_ADMIN.username || password !== DEMO_ADMIN.password) {
+      if (username !== admin.username || password !== admin.password) {
         throw new VitrineApiError('INVALID_CREDENTIALS', 'Usuário ou senha incorretos.', 401);
       }
       const session: Session = {
@@ -186,19 +226,21 @@ export function createMockVitrineClient(options: MockVitrineOptions = {}): Vitri
       async addMercadoLivre(token, input) {
         await sleep(latency);
         auth(token);
-        const data = AddMercadoLivreInputSchema.parse(input);
-        const itemProblem = checkMercadoLivreItemUrl(data.itemUrl);
-        if (itemProblem) throw invalid(LINK_PROBLEM_MESSAGE[itemProblem]);
-        const linkProblem = checkAffiliateLink('mercadolivre', data.affiliateUrl);
-        if (linkProblem) throw invalid(LINK_PROBLEM_MESSAGE[linkProblem]);
+        const { affiliateUrl } = AddMercadoLivreInputSchema.parse(input);
+        const problem = checkAffiliateLink('mercadolivre', affiliateUrl);
+        if (problem) throw invalid(LINK_PROBLEM_MESSAGE[problem]);
+        const item = await lookupMercadoLivre(affiliateUrl);
         return add({
           store: 'mercadolivre',
-          title: data.title,
-          category: data.category,
-          priceFrom: null,
-          priceTo: data.priceTo,
+          title: item.title,
+          category: item.category,
+          imageUrl: item.imageUrl,
+          priceFrom: item.priceFrom,
+          priceTo: item.priceTo,
+          // O ML não expõe a taxa de comissão na API: é uma estimativa para o relatório.
           commissionRate: 0.06,
-          links: [{ channel: 'site', url: data.affiliateUrl }],
+          // O botão Comprar usa o link de afiliado como veio, nunca a URL do anúncio.
+          links: [{ channel: 'site', url: affiliateUrl }],
         });
       },
 

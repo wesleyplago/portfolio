@@ -1,4 +1,5 @@
 import { Suspense, lazy, useMemo, useState, type ComponentType } from 'react';
+import { ProjectPage } from '../components/ProjectPage';
 import { RemoteBoundary } from '../components/RemoteBoundary';
 import { projects } from '../content/projects';
 
@@ -21,7 +22,7 @@ function Slot({ remote, className }: { remote: Remote; className?: string }) {
   return (
     <div className={className} data-remote={remote.name}>
       <RemoteBoundary name={remote.name} devUrl={remote.devUrl} onRetry={() => setAttempt((n) => n + 1)}>
-        <Suspense fallback={<div className="loading">Carregando {remote.label}…</div>}>
+        <Suspense fallback={<div className="loading" style={{ background: 'var(--brand-surface)' }}>Carregando {remote.label}…</div>}>
           <App />
         </Suspense>
       </RemoteBoundary>
@@ -31,34 +32,22 @@ function Slot({ remote, className }: { remote: Remote; className?: string }) {
 
 export function LagoskiPage() {
   return (
-    <section className="section">
-      <div className="page-head">
-        <div>
-          <p className="eyebrow">Projeto · demo ao vivo</p>
-          <h1>{project.name}</h1>
-          <p className="lead">{project.description}</p>
+    <ProjectPage project={project}>
+      <ProjectPage.Cover>
+        <a href={`${import.meta.env.BASE_URL}lagoski/arquitetura.html`} className="cover-btn">
+          Arquitetura
+        </a>
+      </ProjectPage.Cover>
+      <ProjectPage.Guide />
+      <ProjectPage.Demo>
+        <div className="lagoski-layout">
+          <Slot remote={REMOTES.catalog} />
+          <Slot remote={REMOTES.checkout} className="lagoski-side" />
+          <Slot remote={REMOTES.orders} className="lagoski-wide" />
+          <Slot remote={REMOTES.inspector} className="lagoski-wide" />
         </div>
-        <div className="lagoski-links">
-          <a href={`${import.meta.env.BASE_URL}lagoski/arquitetura.html`} className="btn">
-            Arquitetura
-          </a>
-          <a href={project.repo} className="btn" target="_blank" rel="noreferrer">
-            Código ↗
-          </a>
-        </div>
-      </div>
-      <div className="callout">
-        Escolha uma camiseta, feche o pedido e pague. Cada bloco abaixo é um microfrontend separado, dono de um bounded context, e
-        o Event Inspector mostra os eventos que os microsserviços trocam. Com o BFF do Lagoski configurado e no ar, tudo vai para
-        os serviços de verdade e o pagamento abre o Stripe em modo de testes; senão, o sistema inteiro roda simulado no navegador,
-        com as mesmas regras.
-      </div>
-      <div className="lagoski-layout">
-        <Slot remote={REMOTES.catalog} />
-        <Slot remote={REMOTES.checkout} className="lagoski-side" />
-        <Slot remote={REMOTES.orders} className="lagoski-wide" />
-        <Slot remote={REMOTES.inspector} className="lagoski-wide" />
-      </div>
-    </section>
+      </ProjectPage.Demo>
+      <ProjectPage.Inside />
+    </ProjectPage>
   );
 }

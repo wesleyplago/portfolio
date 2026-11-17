@@ -41,7 +41,7 @@ test.describe('navegação do portfólio', () => {
     await expect(page).toHaveURL(/\/projetos\/payops$/);
 
     await page.goto('/');
-    await page.locator('article.project', { hasText: 'payops-agent' }).getByRole('link', { name: 'Demo ao vivo' }).click();
+    await page.locator('article.project', { hasText: 'payops-agent' }).getByRole('link', { name: 'Abrir a demo' }).click();
     await expect(page).toHaveURL(/\/projetos\/payops$/);
     await expect(new PayOps(page).root).toBeVisible();
   });

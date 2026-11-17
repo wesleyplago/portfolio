@@ -369,6 +369,9 @@ importers:
 
   apps/portfolio:
     dependencies:
+      '@portfolio/brands':
+        specifier: workspace:*
+        version: link:../../packages/brands
       react:
         specifier: ^19.2.0
         version: 19.3.1

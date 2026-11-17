@@ -45,14 +45,14 @@ export function Home() {
                 ))}
               </ul>
               <footer>
-                {p.demoPath && (
-                  <Link to={p.demoPath} className="btn primary">
-                    Demo ao vivo
-                  </Link>
+                <Link to={p.demoPath} className="btn primary">
+                  Abrir a demo
+                </Link>
+                {p.repo && (
+                  <a href={p.repo} className="btn" target="_blank" rel="noreferrer">
+                    Repositório ↗
+                  </a>
                 )}
-                <a href={p.repo} className="btn" target="_blank" rel="noreferrer">
-                  Repositório ↗
-                </a>
               </footer>
             </article>
           ))}

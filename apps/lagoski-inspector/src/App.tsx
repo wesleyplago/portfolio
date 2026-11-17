@@ -1,6 +1,9 @@
+import hankenUrl from '@fontsource-variable/hanken-grotesk/files/hanken-grotesk-latin-wght-normal.woff2?url';
+import jetbrainsUrl from '@fontsource/jetbrains-mono/files/jetbrains-mono-latin-400-normal.woff2?url';
 import { useCallback, useEffect, useState } from 'react';
 import {
   contextOf,
+  lagoskiFonts,
   lagoskiTokens,
   onBrowser,
   session,
@@ -14,15 +17,19 @@ import {
 } from '@portfolio/lagoski-contracts';
 import { useBusEvents, useLagoski } from './useLagoski';
 
+const abs = (url: string) => new URL(url, import.meta.url).href;
+const fonts = lagoskiFonts({ text: abs(hankenUrl), mono: abs(jetbrainsUrl) });
+
 const css =
-  lagoskiTokens('.lgk-inspector') +
+  fonts +
+  lagoskiTokens('.lgk-inspector', 'inspector') +
   `
 .lgk-inspector .li-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; font-size: 13px; }
 .lgk-inspector .li-cols { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; }
 @media (max-width: 900px) { .lgk-inspector .li-cols { grid-template-columns: minmax(0, 1fr); } }
 .lgk-inspector h4 { font-size: 13px; color: var(--lg-muted); font-weight: 600; margin-bottom: 8px; }
 .lgk-inspector .li-events { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; max-height: 460px; overflow: auto; }
-.lgk-inspector .li-event { border: 1px solid var(--lg-line); border-left: 3px solid var(--c); border-radius: 8px; background: var(--lg-bg); }
+.lgk-inspector .li-event { border: 1px solid var(--lg-line); border-left: 3px solid var(--c); border-radius: var(--lg-radius-sm); background: var(--lg-bg); }
 .lgk-inspector .li-event > button { width: 100%; text-align: left; border: 0; background: none; color: var(--lg-ink); padding: 6px 10px; display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: 13px; }
 .lgk-inspector .li-time { font: 11px var(--lg-mono); color: var(--lg-muted); font-variant-numeric: tabular-nums; }
 .lgk-inspector .li-type { font-family: var(--lg-mono); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

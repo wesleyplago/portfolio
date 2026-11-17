@@ -72,6 +72,31 @@ test.describe('Lagoski (microfrontends + barramento simulado)', () => {
     await expect(page.getByRole('navigation').getByRole('link', { name: 'Lagoski ao vivo' })).toHaveAttribute('aria-current', 'page');
   });
 
+  test('loja em osso e verde, Inspector escuro', async ({ page }) => {
+    await page.goto('/projetos/lagoski');
+    await expect(page.locator('.lgk-catalog')).toHaveCSS('font-family', /Hanken Grotesk/);
+    await expect(page.locator('.lgk-catalog')).toHaveCSS('background-color', 'rgb(229, 225, 216)');
+    await expect(page.locator('.lgk-inspector .lg-panel').first()).toHaveCSS('background-color', 'rgb(38, 28, 24)');
+  });
+
+  test('fontes não são baixadas além do número de remotes que as declaram', async ({ page }) => {
+    const woff: string[] = [];
+    page.on('response', (r) => {
+      if (/\.woff2(\?|$)/.test(r.url()) && r.ok()) woff.push(r.url());
+    });
+    await new Lagoski(page).open();
+    await expect.poll(() => page.evaluate(() => document.fonts.check('16px "Hanken Grotesk"'))).toBe(true);
+    const family = (u: string) => /newsreader/.test(u) ? 'Newsreader' : /hanken/.test(u) ? 'Hanken Grotesk' : /jetbrains/.test(u) ? 'JetBrains Mono' : u;
+    const counts: Record<string, number> = {};
+    for (const u of woff) counts[family(u)] = (counts[family(u)] ?? 0) + 1;
+    console.log('woff2 por família:', JSON.stringify(counts), woff.map((u) => u.replace(/^https?:\/\//, '')));
+    // Cada remote injeta o próprio @font-face (URL de origem diferente), então o Hanken, comum aos quatro,
+    // baixa uma vez por remote. Newsreader (3 remotes) e JetBrains Mono (1) saem uma vez. Guarda contra piora.
+    const max: Record<string, number> = { Newsreader: 1, 'Hanken Grotesk': 4, 'JetBrains Mono': 1 };
+    for (const [name, n] of Object.entries(counts)) expect(n, `downloads de ${name}`).toBeLessThanOrEqual(max[name] ?? 0);
+    if ((counts['Hanken Grotesk'] ?? 0) > 1) test.info().annotations.push({ type: 'duplicado', description: `Hanken Grotesk x${counts['Hanken Grotesk']}` });
+  });
+
   test('caminho feliz: compra paga com 4242 vai até a entrega, com saga no Inspector e e-mails', async ({ page }) => {
     test.setTimeout(45_000);
     const lg = new Lagoski(page);

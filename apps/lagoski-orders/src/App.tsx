@@ -1,8 +1,11 @@
+import hankenUrl from '@fontsource-variable/hanken-grotesk/files/hanken-grotesk-latin-wght-normal.woff2?url';
+import newsreaderUrl from '@fontsource/newsreader/files/newsreader-latin-600-normal.woff2?url';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   brl,
   CANCEL_LABEL,
   emitBrowser,
+  lagoskiFonts,
   lagoskiTokens,
   onBrowser,
   session,
@@ -15,14 +18,18 @@ import {
 } from '@portfolio/lagoski-contracts';
 import { useBusEvents, useLagoski } from './useLagoski';
 
+const abs = (url: string) => new URL(url, import.meta.url).href;
+const fonts = lagoskiFonts({ display: abs(newsreaderUrl), text: abs(hankenUrl) });
+
 const css =
+  fonts +
   lagoskiTokens('.lgk-orders') +
   `
 .lgk-orders .lo-cols { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; }
 @media (max-width: 760px) { .lgk-orders .lo-cols { grid-template-columns: minmax(0, 1fr); } }
 .lgk-orders h4 { font-size: 13px; color: var(--lg-muted); font-weight: 600; margin-bottom: 8px; }
 .lgk-orders .lo-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.lgk-orders .lo-order { border: 1px solid var(--lg-line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 6px; background: var(--lg-bg); }
+.lgk-orders .lo-order { border: 1px solid var(--lg-line); border-radius: var(--lg-radius-md); padding: 10px 12px; display: grid; gap: 6px; background: var(--lg-bg); }
 .lgk-orders .lo-order.focus { border-color: var(--lg-lake); box-shadow: 0 0 0 1px var(--lg-lake); }
 .lgk-orders .lo-top { display: flex; justify-content: space-between; gap: 8px; align-items: center; flex-wrap: wrap; }
 .lgk-orders .lo-top button { border: 0; background: none; padding: 0; color: var(--lg-ink); font-weight: 600; }

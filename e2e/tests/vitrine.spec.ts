@@ -308,6 +308,7 @@ test('Vitrine usa a marca própria em bordô, e o backoffice é um painel de tra
   await expect(v.cards.first().locator('.vt-price strong')).toHaveCSS('font-family', /Zilla Slab/);
   await v.goTab('Backoffice');
   await expect(v.root.locator('.vt-bo')).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+  await expect(v.root.locator('.vt-bo .vt-panel').first()).toHaveCSS('background-color', 'rgb(244, 244, 244)');
 });
 
 test.describe('vitrine no celular @mobile', () => {

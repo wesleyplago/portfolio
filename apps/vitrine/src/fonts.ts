@@ -1,6 +1,5 @@
 import { fontFaceCss } from '@portfolio/brands';
 import rethinkSansUrl from '@fontsource-variable/rethink-sans/files/rethink-sans-latin-wght-normal.woff2?url';
-import zillaSlab400Url from '@fontsource/zilla-slab/files/zilla-slab-latin-400-normal.woff2?url';
 import zillaSlab600Url from '@fontsource/zilla-slab/files/zilla-slab-latin-600-normal.woff2?url';
 
 /**
@@ -10,7 +9,6 @@ import zillaSlab600Url from '@fontsource/zilla-slab/files/zilla-slab-latin-600-n
 const abs = (url: string) => new URL(url, import.meta.url).href;
 
 export const fonts = fontFaceCss([
-  { family: 'Zilla Slab', url: abs(zillaSlab400Url), weight: '400' },
   { family: 'Zilla Slab', url: abs(zillaSlab600Url), weight: '600' },
   { family: 'Rethink Sans', url: abs(rethinkSansUrl), weight: '400 800' },
 ]);

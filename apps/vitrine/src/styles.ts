@@ -26,7 +26,11 @@ ${tokensCss(brands.vitrine, '.vt', 'vt')}
   box-sizing: border-box;
 }
 /* Backoffice: área de trabalho clara, com tabelas densas. */
-.vt .vt-bo { --vt-bg: #ffffff; --vt-surface: #f4f4f4; background: var(--vt-bg); border-radius: var(--vt-radius-md); padding: 16px; }
+.vt .vt-bo { --vt-bg: #ffffff; --vt-surface: #f4f4f4;
+  --vt-panel: var(--vt-surface);
+  --vt-accent-soft: color-mix(in srgb, var(--vt-accent) 8%, var(--vt-bg));
+  --vt-ok-soft: color-mix(in srgb, var(--vt-ok) 14%, var(--vt-bg));
+  background: var(--vt-bg); border-radius: var(--vt-radius-md); padding: 16px; }
 .vt .vt-bo th, .vt .vt-bo td { padding: 6px 10px; }
 .vt *, .vt *::before, .vt *::after { box-sizing: inherit; }
 .vt h2, .vt h3 { margin: 0; font-family: var(--vt-font-display); font-weight: 600; letter-spacing: -0.01em; }
@@ -90,7 +94,7 @@ ${tokensCss(brands.vitrine, '.vt', 'vt')}
 .vt-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
 .vt-stats div { display: grid; gap: 2px; padding: 12px 14px; border: 1px solid var(--vt-border); border-radius: var(--vt-radius-md); background: var(--vt-panel); }
 .vt-stats span { font-size: 12px; color: var(--vt-muted); }
-.vt-stats strong { font-family: var(--vt-font-display); font-size: 22px; font-variant-numeric: tabular-nums; }
+.vt-stats strong { font-family: var(--vt-font-display); font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
 
 .vt-table-wrap { overflow-x: auto; }
 .vt table { width: 100%; border-collapse: collapse; font-size: 13.5px; }

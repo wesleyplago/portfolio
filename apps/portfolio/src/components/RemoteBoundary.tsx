@@ -27,7 +27,7 @@ export class RemoteBoundary extends Component<Props, State> {
         <h3>Não foi possível carregar o microfrontend “{this.props.name}”.</h3>
         <p>
           Ele roda como um app separado. Suba os apps com <code>pnpm dev</code> na raiz do monorepo
-          {this.props.devUrl && (
+          {import.meta.env.DEV && this.props.devUrl && (
             <>
               {' '}
               (este fica em <code>{this.props.devUrl}</code>)

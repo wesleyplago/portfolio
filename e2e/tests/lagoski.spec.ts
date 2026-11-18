@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import type { Locator, Page } from '@playwright/test';
 import { allowErrors, expect, test } from './fixtures';
+import { LAGOSKI } from '../playwright.config';
 
 /**
  * Jornadas do Lagoski em modo demo: os quatro microfrontends sobem sem BFF e
@@ -67,9 +68,68 @@ class Lagoski {
 test.describe('Lagoski (microfrontends + barramento simulado)', () => {
   test('menu e card da home levam à demo', async ({ page }) => {
     await page.goto('/');
-    await page.locator('article.project', { hasText: 'Lagoski' }).getByRole('link', { name: 'Demo ao vivo' }).click();
+    await page.locator('article.project', { hasText: 'Lagoski' }).getByRole('link', { name: 'Abrir a demo' }).click();
     await expect(page).toHaveURL(/\/projetos\/lagoski$/);
-    await expect(page.getByRole('navigation').getByRole('link', { name: 'Lagoski ao vivo' })).toHaveAttribute('aria-current', 'page');
+    await page.getByRole('navigation').getByRole('button', { name: 'Projetos' }).click();
+    await expect(page.getByRole('navigation').getByRole('link', { name: 'Lagoski', exact: true })).toHaveAttribute('aria-current', 'page');
+  });
+
+  test('loja em osso e verde, Inspector escuro', async ({ page }) => {
+    await page.goto('/projetos/lagoski');
+    await expect(page.locator('.lgk-catalog')).toHaveCSS('font-family', /Hanken Grotesk/);
+    await expect(page.locator('.lgk-catalog')).toHaveCSS('background-color', 'rgb(229, 225, 216)');
+    await expect(page.locator('.lgk-inspector .lg-panel').first()).toHaveCSS('background-color', 'rgb(38, 28, 24)');
+  });
+
+  test('controles nativos e foco seguem a marca de cada remote, não o host', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.goto('/projetos/lagoski');
+    await expect(page.locator('.lgk-catalog')).toHaveCSS('color-scheme', 'light');
+    await expect(page.locator('.lgk-inspector')).toHaveCSS('color-scheme', 'dark');
+    // Qualquer alvo de foco (inclusive scrollers como a lista de eventos) usa o destaque do Inspector.
+    const ring = await page.locator('.lgk-inspector').evaluate((root) => {
+      const el = document.createElement('div');
+      el.tabIndex = -1;
+      root.append(el);
+      el.focus();
+      const out = { visible: el.matches(':focus-visible'), color: getComputedStyle(el).outlineColor };
+      el.remove();
+      return out;
+    });
+    expect(ring).toEqual({ visible: true, color: 'rgb(168, 217, 138)' });
+  });
+
+  test('cada fonte da marca baixa uma vez só, da origem de um remote', async ({ page }) => {
+    const woff: string[] = [];
+    page.on('response', (r) => {
+      if (/\.woff2(\?|$)/.test(r.url()) && r.ok()) woff.push(r.url());
+    });
+    await new Lagoski(page).open();
+    // Espera as três famílias da marca carregarem antes de contar.
+    const loaded = () =>
+      page.evaluate(async () => {
+        await document.fonts.ready;
+        const out: string[] = [];
+        document.fonts.forEach((f) => {
+          if (f.status === 'loaded') out.push(`${f.family.replace(/"/g, '')}|${f.weight}`);
+        });
+        return out;
+      });
+    await expect.poll(loaded, { timeout: 15_000 }).toEqual(
+      expect.arrayContaining(['Newsreader|600', 'Hanken Grotesk|100 900', 'JetBrains Mono|400']),
+    );
+    // Fontes do host (Host Grotesk, JetBrains Mono variável) vêm da origem do host e ficam fora da conta.
+    const hostOrigin = new URL(page.url()).origin;
+    for (const u of woff.filter((u) => new URL(u).origin === hostOrigin)) expect(u, 'fonte da origem do host').toMatch(/host-grotesk|jetbrains-mono/);
+    const remote = woff.filter((u) => new URL(u).origin !== hostOrigin);
+    const remoteOrigins = Object.values(LAGOSKI).map((port) => `http://localhost:${port}`);
+    for (const u of remote) expect(remoteOrigins, u).toContain(new URL(u).origin);
+    const family = (u: string) => /newsreader/.test(u) ? 'Newsreader' : /hanken/.test(u) ? 'Hanken Grotesk' : /jetbrains/.test(u) ? 'JetBrains Mono' : u;
+    const counts: Record<string, number> = {};
+    for (const u of remote) counts[family(u)] = (counts[family(u)] ?? 0) + 1;
+    console.log('woff2 por família:', JSON.stringify(counts), remote.map((u) => u.replace(/^https?:\/\//, '')));
+    // As faces são registradas pela API FontFace uma vez por documento, então cada arquivo sai uma vez.
+    expect(counts).toEqual({ Newsreader: 1, 'Hanken Grotesk': 1, 'JetBrains Mono': 1 });
   });
 
   test('caminho feliz: compra paga com 4242 vai até a entrega, com saga no Inspector e e-mails', async ({ page }) => {

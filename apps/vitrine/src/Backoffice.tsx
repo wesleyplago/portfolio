@@ -49,7 +49,7 @@ function Login({ client, onLogin }: { client: VitrineClient; onLogin: (s: Sessio
   };
 
   return (
-    <section className="vt-section vt-login">
+    <section className="vt-section vt-login vt-bo">
       <form onSubmit={submit} className="vt-panel">
         <h2>Entrar no backoffice</h2>
         <label htmlFor="vt-user">Usuário</label>
@@ -127,7 +127,7 @@ function Dashboard({ client, session, onLogout }: { client: VitrineClient; sessi
   );
 
   return (
-    <section className="vt-section">
+    <section className="vt-section vt-bo">
       <div className="vt-bar">
         <span>
           Logado como <strong>{session.username}</strong>

@@ -1,0 +1,7 @@
+[
+  { "check": "same-action", "target": "a.btn.primary \"Abrir a demo\"", "reason": "spec 4.2: cada banda de projeto usa as cores da marca do próprio app, então o mesmo botão muda de cor de propósito em cada banda" },
+  { "check": "same-action", "target": "a.btn:nth-of-type(2) \"Ver o código", "reason": "spec 4.2: o botão secundário de cada banda está na marca do app (PayOps claro, RAG grafite), por desenho do host de microfrontends" },
+  { "check": "button-styles", "target": "(the page)", "reason": "a contagem soma os botões das 4 bandas, cada uma na marca do seu app (spec 4.2 e tabela 5.5); no host há um primário e um secundário" },
+  { "check": "heading-scale", "target": "p.band-metric > strong \"0/120\"", "reason": "spec 4.2 pede uma métrica grande em cada banda; o número é o destaque visual da banda, e o h2 continua sendo o nome do projeto" },
+  { "check": "section-height", "target": "footer.footer", "reason": "é o rodapé de uma linha pedido na spec 4.4, não uma seção de conteúdo; não faz sentido ocupar uma tela" }
+]

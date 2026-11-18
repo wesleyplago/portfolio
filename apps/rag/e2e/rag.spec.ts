@@ -197,3 +197,10 @@ test.describe('desacoplamento', () => {
     await expect(page.getByRole('heading', { name: 'RAG sobre regulação de pagamentos' })).toBeVisible();
   });
 });
+
+test('RAG usa a marca própria mesmo com o sistema em modo claro', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.goto(RAG);
+  await expect(rag(page)).toHaveCSS('background-color', 'rgb(24, 25, 27)');
+  await expect(rag(page)).toHaveCSS('font-family', /Funnel/);
+});

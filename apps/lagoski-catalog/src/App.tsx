@@ -1,9 +1,12 @@
+import hankenUrl from '@fontsource-variable/hanken-grotesk/files/hanken-grotesk-latin-wght-normal.woff2?url';
+import newsreaderUrl from '@fontsource/newsreader/files/newsreader-latin-600-normal.woff2?url';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   brl,
   emitBrowser,
   ensureCart,
   LagoskiApiError,
+  registerLagoskiFonts,
   lagoskiTokens,
   type LagoskiClient,
   type ObservedEvent,
@@ -13,21 +16,23 @@ import {
 import { TeeArt } from './TeeArt';
 import { useBusEvents, useLagoski } from './useLagoski';
 
+registerLagoskiFonts({ display: newsreaderUrl, text: hankenUrl });
+
 const css =
   lagoskiTokens('.lgk-catalog') +
   `
-.lgk-catalog .lc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
-.lgk-catalog .lc-card { border: 1px solid var(--lg-line); border-radius: var(--lg-radius); background: var(--lg-bg); padding: 12px; display: grid; gap: 8px; align-content: start; }
-.lgk-catalog .lc-art { width: 100%; max-width: 100%; aspect-ratio: 1; display: block; background: var(--lg-surface); border-radius: 10px; }
+.lgk-catalog .lc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.lgk-catalog .lc-card { border: 1px solid var(--lg-line); border-radius: var(--lg-radius-md); background: var(--lg-bg); padding: 12px; display: grid; gap: 8px; align-content: start; }
+.lgk-catalog .lc-art { width: 100%; max-width: 100%; aspect-ratio: 1; display: block; padding: 8px; background: var(--lg-surface); border-radius: var(--lg-radius-sm); }
 .lgk-catalog .lc-name { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
-.lgk-catalog .lc-name h4 { font-size: 15px; }
+.lgk-catalog .lc-name h4 { font: 600 20px/1.2 var(--lg-font-display); }
 .lgk-catalog .lc-price { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .lgk-catalog .lc-desc { color: var(--lg-muted); font-size: 13px; min-height: 2.6em; }
 .lgk-catalog .lc-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 .lgk-catalog .lc-swatch { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--lg-surface); box-shadow: 0 0 0 1px var(--lg-line); padding: 0; }
 .lgk-catalog .lc-swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--lg-lake); }
-.lgk-catalog .lc-size { min-width: 34px; padding: 3px 6px; border-radius: 7px; border: 1px solid var(--lg-line); background: var(--lg-surface); color: var(--lg-ink); font-size: 12px; font-weight: 600; }
-.lgk-catalog .lc-size[aria-pressed="true"] { background: var(--lg-lake-strong); border-color: var(--lg-lake-strong); color: #fff; }
+.lgk-catalog .lc-size { min-width: 34px; padding: 3px 6px; border-radius: var(--lg-radius-sm); border: 1px solid var(--lg-line); background: var(--lg-surface); color: var(--lg-ink); font-size: 12px; font-weight: 600; }
+.lgk-catalog .lc-size[aria-pressed="true"] { background: var(--lg-lake-strong); border-color: var(--lg-lake-strong); color: var(--lg-on-accent); }
 .lgk-catalog .lc-stock { font-size: 12px; color: var(--lg-muted); font-variant-numeric: tabular-nums; }
 .lgk-catalog .lc-stock.low { color: var(--lg-warn); font-weight: 600; }
 .lgk-catalog .lc-stock.out { color: var(--lg-bad); font-weight: 600; }

@@ -1,9 +1,12 @@
+import hankenUrl from '@fontsource-variable/hanken-grotesk/files/hanken-grotesk-latin-wght-normal.woff2?url';
+import newsreaderUrl from '@fontsource/newsreader/files/newsreader-latin-600-normal.woff2?url';
 import { useCallback, useEffect, useState } from 'react';
 import {
   brl,
   CANCEL_LABEL,
   emitBrowser,
   LagoskiApiError,
+  registerLagoskiFonts,
   lagoskiTokens,
   onBrowser,
   session,
@@ -19,6 +22,8 @@ import {
 } from '@portfolio/lagoski-contracts';
 import { useBusEvents, useLagoski } from './useLagoski';
 
+registerLagoskiFonts({ display: newsreaderUrl, text: hankenUrl });
+
 const css =
   lagoskiTokens('.lgk-checkout') +
   `
@@ -26,7 +31,7 @@ const css =
 .lgk-checkout .ck-item { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; font-size: 13px; }
 .lgk-checkout .ck-item small { display: block; color: var(--lg-muted); font-family: var(--lg-mono); font-size: 11px; }
 .lgk-checkout .ck-qty { font-variant-numeric: tabular-nums; color: var(--lg-muted); }
-.lgk-checkout .ck-remove { border: 0; background: none; color: var(--lg-muted); padding: 2px 6px; border-radius: 6px; }
+.lgk-checkout .ck-remove { border: 0; background: none; color: var(--lg-muted); padding: 2px 6px; border-radius: var(--lg-radius-sm); }
 .lgk-checkout .ck-remove:hover { color: var(--lg-bad); }
 .lgk-checkout .ck-total { display: flex; justify-content: space-between; border-top: 1px solid var(--lg-line); margin-top: 12px; padding-top: 10px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .lgk-checkout .ck-actions { display: grid; gap: 8px; margin-top: 12px; }
@@ -37,9 +42,9 @@ const css =
 .lgk-checkout .ck-steps li::before { content: ""; width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--lg-line); flex: none; }
 .lgk-checkout .ck-steps li.done::before { background: var(--lg-ok); border-color: var(--lg-ok); }
 .lgk-checkout .ck-steps li.current::before { border-color: var(--lg-lake); }
-.lgk-checkout .ck-pay { background: var(--lg-lake-soft); border-radius: 10px; padding: 12px; display: grid; gap: 8px; }
+.lgk-checkout .ck-pay { background: var(--lg-lake-soft); border-radius: var(--lg-radius-md); padding: 12px; display: grid; gap: 8px; }
 .lgk-checkout .ck-pay label { font-size: 12px; color: var(--lg-muted); display: grid; gap: 4px; }
-.lgk-checkout .ck-pay input { font: 14px var(--lg-mono); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--lg-line); background: var(--lg-surface); color: var(--lg-ink); width: 100%; }
+.lgk-checkout .ck-pay input { font: 14px var(--lg-mono); padding: 8px 10px; border-radius: var(--lg-radius-sm); border: 1px solid var(--lg-line); background: var(--lg-surface); color: var(--lg-ink); width: 100%; }
 .lgk-checkout .ck-stripe { font-weight: 700; letter-spacing: -.01em; }
 .lgk-checkout .ck-hint { font-size: 12px; color: var(--lg-muted); }
 .lgk-checkout .ck-row { display: flex; gap: 8px; flex-wrap: wrap; }

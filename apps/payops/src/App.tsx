@@ -5,6 +5,7 @@ import { ApprovalInbox } from './components/ApprovalInbox';
 import { OperatorPanel } from './components/OperatorPanel';
 import { config } from './config';
 import { connect, type Connection } from './connect';
+import { fonts } from './fonts';
 import { css } from './styles';
 import { usePayOps } from './usePayOps';
 
@@ -28,7 +29,7 @@ export default function PayOpsApp() {
 
   return (
     <div className="payops">
-      <style>{css}</style>
+      <style>{fonts + css}</style>
       {connection ? (
         <Console connection={connection} />
       ) : (
@@ -50,7 +51,7 @@ function Console({ connection }: { connection: Connection }) {
 
       <header className="po-top">
         <div className="po-brand">
-          <div className="po-logo">P</div>
+          <div className="po-logo" aria-hidden="true">PO</div>
           <div>
             <h2>PayOps Console</h2>
             <div className="po-sub">Agente de pagamentos com raio de explosão controlado</div>

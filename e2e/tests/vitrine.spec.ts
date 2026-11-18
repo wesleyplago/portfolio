@@ -68,7 +68,8 @@ test.describe('vitrine pública', () => {
   test('menu leva à vitrine, que mostra só produtos publicados', async ({ page }) => {
     const v = new Vitrine(page);
     await page.goto('/');
-    await page.getByRole('navigation').getByRole('link', { name: 'Vitrine ao vivo' }).click();
+    await page.getByRole('navigation').getByRole('button', { name: 'Projetos' }).click();
+    await page.getByRole('navigation').getByRole('link', { name: 'Vitrine de afiliados' }).click();
     await expect(page).toHaveURL(/\/projetos\/vitrine$/);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Vitrine de afiliados');
     await expect(v.cards).toHaveCount(4);
@@ -298,6 +299,17 @@ test.describe('qualidade da interface', () => {
     await expect(page.getByRole('heading', { name: /Não foi possível carregar o microfrontend “vitrine”/ })).toBeVisible();
     await expect(page.getByRole('navigation')).toBeVisible();
   });
+});
+
+test('Vitrine usa a marca própria em bordô, e o backoffice é um painel de trabalho branco', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'dark' });
+  const v = new Vitrine(page);
+  await v.open();
+  await expect(v.root).toHaveCSS('background-color', 'rgb(226, 226, 226)');
+  await expect(v.cards.first().locator('.vt-price strong')).toHaveCSS('font-family', /Zilla Slab/);
+  await v.goTab('Backoffice');
+  await expect(v.root.locator('.vt-bo')).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+  await expect(v.root.locator('.vt-bo .vt-panel').first()).toHaveCSS('background-color', 'rgb(244, 244, 244)');
 });
 
 test.describe('vitrine no celular @mobile', () => {

@@ -178,6 +178,12 @@ importers:
 
   apps/lagoski-catalog:
     dependencies:
+      '@fontsource-variable/hanken-grotesk':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/newsreader':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@portfolio/lagoski-contracts':
         specifier: workspace:*
         version: link:../../packages/lagoski-contracts
@@ -209,6 +215,12 @@ importers:
 
   apps/lagoski-checkout:
     dependencies:
+      '@fontsource-variable/hanken-grotesk':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/newsreader':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@portfolio/lagoski-contracts':
         specifier: workspace:*
         version: link:../../packages/lagoski-contracts
@@ -240,6 +252,12 @@ importers:
 
   apps/lagoski-inspector:
     dependencies:
+      '@fontsource-variable/hanken-grotesk':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/jetbrains-mono':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@portfolio/lagoski-contracts':
         specifier: workspace:*
         version: link:../../packages/lagoski-contracts
@@ -271,6 +289,12 @@ importers:
 
   apps/lagoski-orders:
     dependencies:
+      '@fontsource-variable/hanken-grotesk':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/newsreader':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@portfolio/lagoski-contracts':
         specifier: workspace:*
         version: link:../../packages/lagoski-contracts
@@ -302,6 +326,15 @@ importers:
 
   apps/payops:
     dependencies:
+      '@fontsource-variable/chivo':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource-variable/chivo-mono':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@portfolio/brands':
+        specifier: workspace:*
+        version: link:../../packages/brands
       '@portfolio/payops-contracts':
         specifier: workspace:*
         version: link:../../packages/payops-contracts
@@ -336,6 +369,15 @@ importers:
 
   apps/portfolio:
     dependencies:
+      '@fontsource-variable/host-grotesk':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource-variable/jetbrains-mono':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@portfolio/brands':
+        specifier: workspace:*
+        version: link:../../packages/brands
       react:
         specifier: ^19.2.0
         version: 19.3.1
@@ -367,6 +409,18 @@ importers:
 
   apps/rag:
     dependencies:
+      '@fontsource-variable/funnel-display':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource-variable/funnel-sans':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/dm-mono':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@portfolio/brands':
+        specifier: workspace:*
+        version: link:../../packages/brands
       '@portfolio/rag-contracts':
         specifier: workspace:*
         version: link:../../packages/rag-contracts
@@ -401,6 +455,15 @@ importers:
 
   apps/vitrine:
     dependencies:
+      '@fontsource-variable/rethink-sans':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/zilla-slab':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@portfolio/brands':
+        specifier: workspace:*
+        version: link:../../packages/brands
       '@portfolio/vitrine-contracts':
         specifier: workspace:*
         version: link:../../packages/vitrine-contracts
@@ -467,8 +530,20 @@ importers:
         specifier: ~5.9.3
         version: 5.9.3
 
+  packages/brands:
+    devDependencies:
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.7(@types/node@22.20.5)(supports-color@8.1.1)(tsx@4.23.15)
+
   packages/lagoski-contracts:
     dependencies:
+      '@portfolio/brands':
+        specifier: workspace:*
+        version: link:../brands
       zod:
         specifier: ^4.1.12
         version: 4.6.7
@@ -765,6 +840,42 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@fontsource-variable/chivo-mono@5.3.0':
+    resolution: {integrity: sha512-S96WUAZDi9vm1YY35jhLhArRcfEp0Qcnh4xGdtVl8Ffm4QbRcfpArkyklHlsug8xv4Y9MfVn/DWIerOB1PQUMA==}
+
+  '@fontsource-variable/chivo@5.3.0':
+    resolution: {integrity: sha512-lbYs65CyAE3RDvZjiFSt2HYF/cPl/2wB3RSBzSlRqPxYw5uqA/Ux/Wa/BuDEKo72NXmiR9F5ba8FXqJnooRhSA==}
+
+  '@fontsource-variable/funnel-display@5.3.0':
+    resolution: {integrity: sha512-o/12lyrfflx5QAQFa+hAl0uBeWoBUAm5w71j+KssBseo++XJT3tnveDSg5IAnAdiclQHfFuEZiL5Wn2BjuFxtw==}
+
+  '@fontsource-variable/funnel-sans@5.3.0':
+    resolution: {integrity: sha512-NOgHy3KWMAJdl33XSESit33nI8vlFZh8/0E3tLD7z5jJA5gQoLeUkFcZtxehVVkyYpAZ747tF8O/kAHXXa96ZA==}
+
+  '@fontsource-variable/hanken-grotesk@5.3.0':
+    resolution: {integrity: sha512-DOd0FqL+3cH2dfNy0JtSq9tUfxBz5mLmHMjTU0DOr3E9Zo6wxuatCl53DIPNrSPgCsnuKyM739BTIG5glCLirw==}
+
+  '@fontsource-variable/host-grotesk@5.3.0':
+    resolution: {integrity: sha512-WvdqilphrdjYLeCHXny9gkdpIZgzyeHpgRWB8T4LSKs5nVnCs6pYYeCeMiRshxcuB6djqL6CSdF1Hq0BvMNCwA==}
+
+  '@fontsource-variable/jetbrains-mono@5.3.0':
+    resolution: {integrity: sha512-F32xpS2NsGYoQi2ADSkKTgpJj7ozajsGgDJ8woTnqjmIB+dxDIqImjl4pXZVEExu8UFZ2ndhmX18EBS/hdz3Lw==}
+
+  '@fontsource-variable/rethink-sans@5.3.0':
+    resolution: {integrity: sha512-TxcGrNeylZZ3eL5WuNxvm1OLOMOrmYTRZcqMUoYhOfpcMgvE6PhssC6JGkPHhN93phU569RLD8cSykOjyHCuxg==}
+
+  '@fontsource/dm-mono@5.3.0':
+    resolution: {integrity: sha512-OINjI8C1S/wpchhQxl7njZdMn4+hnDCpQ4YtvvOpKNARo+0J8O1x1IcrChxNjHOhfVv1by8C/FQoy3hXK+C1Ug==}
+
+  '@fontsource/jetbrains-mono@5.3.0':
+    resolution: {integrity: sha512-fqDfB5I9f1p1TV486aUgB9t8zP84P0O1FtQR5Ol9vjwPy+S+EIGlVYm1cvj2W5shcZMTg2nZFdVMoH5wFu8a1A==}
+
+  '@fontsource/newsreader@5.3.0':
+    resolution: {integrity: sha512-AFR6ZKY89GNL+9qBI2P2+66NhD5bhOj/v6fsLnFYLM4E0JnMB1yKb+Ro8cA64i1hwAWoBfTq5CHJGWH1toLDkw==}
+
+  '@fontsource/zilla-slab@5.3.0':
+    resolution: {integrity: sha512-xbdDx5OESJDQqp3GIp4pjBgI+qpcg4AxnHLN15ekfJbG+ZYaOXg3uBjDpYlkuPQpey91afxHBNaqZgzluJ2FWA==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -1694,6 +1805,30 @@ snapshots:
 
   '@esbuild/win32-x64@0.28.2':
     optional: true
+
+  '@fontsource-variable/chivo-mono@5.3.0': {}
+
+  '@fontsource-variable/chivo@5.3.0': {}
+
+  '@fontsource-variable/funnel-display@5.3.0': {}
+
+  '@fontsource-variable/funnel-sans@5.3.0': {}
+
+  '@fontsource-variable/hanken-grotesk@5.3.0': {}
+
+  '@fontsource-variable/host-grotesk@5.3.0': {}
+
+  '@fontsource-variable/jetbrains-mono@5.3.0': {}
+
+  '@fontsource-variable/rethink-sans@5.3.0': {}
+
+  '@fontsource/dm-mono@5.3.0': {}
+
+  '@fontsource/jetbrains-mono@5.3.0': {}
+
+  '@fontsource/newsreader@5.3.0': {}
+
+  '@fontsource/zilla-slab@5.3.0': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:

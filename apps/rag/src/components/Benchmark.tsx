@@ -3,9 +3,9 @@ import { BENCHMARK } from '../benchmark';
 const pct = (v: number) => v.toFixed(3);
 
 /** Barra horizontal simples para comparar recall@10 entre configs. */
-function Bar({ value }: { value: number }) {
+function Bar({ value, kind }: { value: number; kind: 'best' | 'base' | 'other' }) {
   return (
-    <div className="rg-bar" aria-hidden>
+    <div className={`rg-bar ${kind}`} aria-hidden>
       <span style={{ width: `${Math.max(0, Math.min(1, value)) * 100}%` }} />
     </div>
   );
@@ -13,6 +13,8 @@ function Bar({ value }: { value: number }) {
 
 export function Benchmark() {
   const measured = BENCHMARK.configs.filter((c) => c.status === 'ok');
+  const bestRecall = Math.max(...measured.map((c) => c.recall));
+  const kindOf = (c: (typeof measured)[number]) => (c.recall === bestRecall ? 'best' : c.name === 'bm25' ? 'base' : 'other');
   const skipped = BENCHMARK.configs.filter((c) => c.status === 'skipped');
 
   return (
@@ -50,7 +52,7 @@ export function Benchmark() {
                   <td>
                     <div className="rg-cell-bar">
                       {pct(c.recall)}
-                      <Bar value={c.recall} />
+                      <Bar value={c.recall} kind={kindOf(c)} />
                     </div>
                   </td>
                   <td className="rg-sub">

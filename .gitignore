@@ -6,3 +6,7 @@ dist/
 .env
 .env.local
 _site/
+
+# tasteskill: só os waivers vão para o repositório
+.taste-skill/*
+!.taste-skill/waivers.json

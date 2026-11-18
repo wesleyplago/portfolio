@@ -1,13 +1,24 @@
+import type { BrandId } from '@portfolio/brands';
+
 export type Project = {
+  /** Id da banda na home (/#slug); igual ao fim da rota da demo. */
   slug: string;
   name: string;
   tagline: string;
   description: string;
   stack: string[];
   highlights: string[];
-  repo: string;
-  /** Rota interna com demo ao vivo (microfrontend), quando existir. */
-  demoPath?: string;
+  /** Ausente quando o código não é público: o botão "Ver o código" não aparece. */
+  repo?: string;
+  /** Rota interna da demo ao vivo (microfrontend). */
+  demoPath: string;
+  /** Marca do app, aplicada na capa da página. */
+  brand: BrandId;
+  metric: { value: string; label: string };
+  /** Os três passos de "como usar a demo". */
+  guide: [string, string, string];
+  /** Nome-base da captura de tela (assets/shots/{shot}-frame.jpg), usado a partir da Task 9. */
+  shot: string;
 };
 
 export const projects: Project[] = [
@@ -25,9 +36,13 @@ export const projects: Project[] = [
     ],
     repo: 'https://github.com/wesleyplago/payops-agent',
     demoPath: '/projetos/payops',
+    brand: 'payops',
+    metric: { value: '0/120', label: 'ataques de prompt injection que passaram' },
+    guide: ['Cobre R$ 100 e peça ao agente um estorno de R$ 50', 'Aprove ou recuse como operador, à direita', 'Confira a operação no log de auditoria'],
+    shot: 'payops',
   },
   {
-    slug: 'rag-eval-harness',
+    slug: 'rag',
     name: 'rag-eval-harness',
     tagline: 'Bancada de avaliação de RAG sobre regulação de pagamentos',
     description:
@@ -40,6 +55,10 @@ export const projects: Project[] = [
     ],
     repo: 'https://github.com/wesleyplago/rag-eval-harness',
     demoPath: '/projetos/rag',
+    brand: 'rag',
+    metric: { value: '0,43 → 0,82', label: 'recall@10 de BM25 para busca densa' },
+    guide: ['Busque um termo da regulação do Pix', 'Veja os trechos citados e a pontuação de cada um', 'Compare BM25, dense e híbrido no benchmark'],
+    shot: 'rag',
   },
   {
     slug: 'lagoski',
@@ -55,5 +74,27 @@ export const projects: Project[] = [
     ],
     repo: 'https://github.com/wesleyplago/lagoski-platform',
     demoPath: '/projetos/lagoski',
+    brand: 'lagoski',
+    metric: { value: '6', label: 'bounded contexts que só conversam por eventos' },
+    guide: ['Escolha uma camiseta e um tamanho', 'Feche o pedido e pague', 'Acompanhe os eventos no Event Inspector'],
+    shot: 'lagoski',
+  },
+  {
+    slug: 'vitrine',
+    name: 'Vitrine de afiliados',
+    tagline: 'Vitrine de ofertas da Shopee e do Mercado Livre, com backoffice',
+    description:
+      'Vitrine de ofertas da Shopee e do Mercado Livre com links de afiliado, e um backoffice para cadastrar produtos e acompanhar cliques e pedidos.',
+    stack: ['TypeScript', 'React', 'Module Federation'],
+    highlights: [
+      'Ofertas de dois marketplaces na mesma vitrine',
+      'Backoffice com login de admin para cadastrar produtos',
+      'Cliques e pedidos acompanhados no painel',
+    ],
+    demoPath: '/projetos/vitrine',
+    brand: 'vitrine',
+    metric: { value: '2', label: 'marketplaces na mesma vitrine' },
+    guide: ['Abra uma oferta da Shopee ou do Mercado Livre', 'Entre no backoffice como admin', 'Cadastre e publique um produto e veja-o na vitrine'],
+    shot: 'vitrine',
   },
 ];

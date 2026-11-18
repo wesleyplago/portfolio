@@ -38,7 +38,7 @@ export const projects: Project[] = [
     demoPath: '/projetos/payops',
     brand: 'payops',
     metric: { value: '0/120', label: 'ataques de prompt injection que passaram' },
-    guide: ['Peça ao agente um estorno de R$ 50', 'Aprove ou recuse como operador, à direita', 'Confira a operação no log de auditoria'],
+    guide: ['Cobre R$ 100 e peça ao agente um estorno de R$ 50', 'Aprove ou recuse como operador, à direita', 'Confira a operação no log de auditoria'],
     shot: 'payops',
   },
   {
@@ -57,7 +57,7 @@ export const projects: Project[] = [
     demoPath: '/projetos/rag',
     brand: 'rag',
     metric: { value: '0,43 → 0,82', label: 'recall@10 de BM25 para busca densa' },
-    guide: ['Busque um termo da regulação do Pix', 'Compare os quatro métodos lado a lado', 'Abra o benchmark com intervalos de confiança'],
+    guide: ['Busque um termo da regulação do Pix', 'Veja os trechos citados e a pontuação de cada um', 'Compare BM25, dense e híbrido no benchmark'],
     shot: 'rag',
   },
   {
@@ -94,7 +94,7 @@ export const projects: Project[] = [
     demoPath: '/projetos/vitrine',
     brand: 'vitrine',
     metric: { value: '2', label: 'marketplaces na mesma vitrine' },
-    guide: ['Abra uma oferta da Shopee ou do Mercado Livre', 'Entre no backoffice como admin', 'Cadastre um produto e veja-o na vitrine'],
+    guide: ['Abra uma oferta da Shopee ou do Mercado Livre', 'Entre no backoffice como admin', 'Cadastre e publique um produto e veja-o na vitrine'],
     shot: 'vitrine',
   },
 ];

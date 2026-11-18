@@ -1,5 +1,6 @@
 import { NavLink, Route, Routes } from 'react-router-dom';
 import { profile } from './content/profile';
+import { ProjectsMenu } from './components/ProjectsMenu';
 import { Home } from './pages/Home';
 import { PayOpsPage } from './pages/PayOpsPage';
 import { RagPage } from './pages/RagPage';
@@ -12,15 +13,13 @@ export default function App() {
     <div className="shell">
       <header className="nav">
         <NavLink to="/" className="nav-brand">
-          <span className="nav-mark">{profile.name.charAt(0)}</span>
+          <span className="nav-mark" aria-hidden="true">{profile.name.charAt(0)}</span>
           {profile.handle}
         </NavLink>
         <nav className="nav-links">
-          <NavLink to="/" end>Início</NavLink>
-          <NavLink to="/projetos/payops">PayOps ao vivo</NavLink>
-          <NavLink to="/projetos/rag">RAG ao vivo</NavLink>
-          <NavLink to="/projetos/vitrine">Vitrine ao vivo</NavLink>
-          <NavLink to="/projetos/lagoski">Lagoski ao vivo</NavLink>
+          <ProjectsMenu />
+          <a href={`${import.meta.env.BASE_URL}#sobre`}>Sobre</a>
+          <a href={`${import.meta.env.BASE_URL}#contato`}>Contato</a>
           {profile.links.map((l) => (
             <a key={l.href} href={l.href} target="_blank" rel="noreferrer">
               {l.label} ↗
@@ -39,8 +38,7 @@ export default function App() {
         </Routes>
       </main>
       <footer className="footer">
-        Portfólio em React + TypeScript. O PayOps, o RAG e as quatro telas do Lagoski são microfrontends separados, carregados em runtime via
-        Module Federation.
+        Feito em React e TypeScript. Cada demo é um microfrontend carregado em runtime.
       </footer>
     </div>
   );

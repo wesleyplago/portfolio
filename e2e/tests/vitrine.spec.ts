@@ -68,7 +68,8 @@ test.describe('vitrine pública', () => {
   test('menu leva à vitrine, que mostra só produtos publicados', async ({ page }) => {
     const v = new Vitrine(page);
     await page.goto('/');
-    await page.getByRole('navigation').getByRole('link', { name: 'Vitrine ao vivo' }).click();
+    await page.getByRole('navigation').getByRole('button', { name: 'Projetos' }).click();
+    await page.getByRole('navigation').getByRole('link', { name: 'Vitrine de afiliados' }).click();
     await expect(page).toHaveURL(/\/projetos\/vitrine$/);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Vitrine de afiliados');
     await expect(v.cards).toHaveCount(4);

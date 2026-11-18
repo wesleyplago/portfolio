@@ -69,7 +69,8 @@ test.describe('Lagoski (microfrontends + barramento simulado)', () => {
     await page.goto('/');
     await page.locator('article.project', { hasText: 'Lagoski' }).getByRole('link', { name: 'Abrir a demo' }).click();
     await expect(page).toHaveURL(/\/projetos\/lagoski$/);
-    await expect(page.getByRole('navigation').getByRole('link', { name: 'Lagoski ao vivo' })).toHaveAttribute('aria-current', 'page');
+    await page.getByRole('navigation').getByRole('button', { name: 'Projetos' }).click();
+    await expect(page.getByRole('navigation').getByRole('link', { name: 'Lagoski', exact: true })).toHaveAttribute('aria-current', 'page');
   });
 
   test('loja em osso e verde, Inspector escuro', async ({ page }) => {

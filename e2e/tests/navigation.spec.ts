@@ -25,14 +25,50 @@ test.describe('navegação do portfólio', () => {
     await page.goto('/');
     const nav = page.getByRole('navigation');
 
-    await nav.getByRole('link', { name: 'PayOps ao vivo' }).click();
+    await nav.getByRole('button', { name: 'Projetos' }).click();
+    await nav.getByRole('link', { name: 'payops-agent' }).click();
     await expect(page).toHaveURL(/\/projetos\/payops$/);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('payops-agent');
-    await expect(nav.getByRole('link', { name: 'PayOps ao vivo' })).toHaveAttribute('aria-current', 'page');
+    // O submenu fecha ao navegar; reabrir mostra o item ativo.
+    await expect(nav.getByRole('button', { name: 'Projetos' })).toHaveAttribute('aria-expanded', 'false');
+    await nav.getByRole('button', { name: 'Projetos' }).click();
+    await expect(nav.getByRole('link', { name: 'payops-agent' })).toHaveAttribute('aria-current', 'page');
 
-    await nav.getByRole('link', { name: 'Início' }).click();
+    await page.getByRole('link', { name: 'wesleyplago' }).click();
     await expect(page).toHaveURL(/\/$/);
-    await expect(nav.getByRole('link', { name: 'Início' })).toHaveAttribute('aria-current', 'page');
+  });
+
+  test('submenu de projetos por teclado', async ({ page }) => {
+    await page.goto('/');
+    const btn = page.getByRole('button', { name: 'Projetos' });
+    await btn.focus();
+    await page.keyboard.press('Enter');
+    await expect(btn).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.getByRole('link', { name: /Vitrine/ })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(btn).toHaveAttribute('aria-expanded', 'false');
+    await expect(btn).toBeFocused();
+  });
+
+  test('submenu fecha com clique fora', async ({ page }) => {
+    await page.goto('/');
+    const btn = page.getByRole('button', { name: 'Projetos' });
+    await btn.click();
+    await expect(btn).toHaveAttribute('aria-expanded', 'true');
+    await page.getByRole('heading', { level: 1 }).click();
+    await expect(btn).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  test('host usa Host Grotesk', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('body')).toHaveCSS('font-family', /Host Grotesk/);
+  });
+
+  test('remote não vaza estilo para o host', async ({ page }) => {
+    await page.goto('/projetos/lagoski');
+    await expect(page.locator('.lgk-catalog')).toBeVisible();
+    await expect(page.locator('body')).toHaveCSS('font-family', /Host Grotesk/);
+    await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(238, 240, 243)');
   });
 
   test('CTA do topo e o card do projeto abrem a demo', async ({ page }) => {
@@ -66,7 +102,8 @@ test.describe('navegação do portfólio', () => {
 
   test('menu leva ao RAG, outro microfrontend no mesmo host', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('navigation').getByRole('link', { name: 'RAG ao vivo' }).click();
+    await page.getByRole('navigation').getByRole('button', { name: 'Projetos' }).click();
+    await page.getByRole('navigation').getByRole('link', { name: 'rag-eval-harness' }).click();
     await expect(page).toHaveURL(/\/projetos\/rag$/);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('rag-eval-harness');
     // O conteúdo do RAG é coberto pelas jornadas em apps/rag/e2e; aqui basta o remote montar.

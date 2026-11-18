@@ -1,16 +1,21 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 /** Navegação do portfólio (host) e carregamento dos microfrontends. */
+
+async function openProject(page: Page, name: string) {
+  await page.getByRole('button', { name: 'Projetos' }).click();
+  await page.getByRole('navigation').getByRole('link', { name }).click();
+}
 
 test.describe('portfólio', () => {
   test('home lista os projetos e leva às demos', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByRole('link', { name: 'Início' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Projetos' })).toBeVisible();
     await expect(page.getByText('payops-agent').first()).toBeVisible();
     await expect(page.getByText('rag-eval-harness').first()).toBeVisible();
 
     // Card do rag-eval-harness tem link para a demo ao vivo.
-    await page.locator('a[href="/projetos/rag"]').filter({ hasNotText: 'RAG ao vivo' }).first().click();
+    await page.locator('main a[href="/projetos/rag"]').first().click();
     await expect(page).toHaveURL(/\/projetos\/rag$/);
     await expect(page.getByRole('heading', { level: 1, name: 'rag-eval-harness' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'RAG sobre regulação de pagamentos' })).toBeVisible();
@@ -18,18 +23,18 @@ test.describe('portfólio', () => {
 
   test('menu navega entre Início, PayOps e RAG sem recarregar', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('link', { name: 'RAG ao vivo' }).click();
+    await openProject(page, 'rag-eval-harness');
     await expect(page.getByRole('heading', { name: 'RAG sobre regulação de pagamentos' })).toBeVisible();
 
-    await page.getByRole('link', { name: 'PayOps ao vivo' }).click();
+    await openProject(page, 'payops-agent');
     await expect(page).toHaveURL(/\/projetos\/payops$/);
     await expect(page.getByRole('heading', { level: 1, name: 'payops-agent' })).toBeVisible();
     await expect(page.locator('.payops')).toBeVisible();
 
-    await page.getByRole('link', { name: 'RAG ao vivo' }).click();
+    await openProject(page, 'rag-eval-harness');
     await expect(page.locator('.rag')).toBeVisible();
 
-    await page.getByRole('link', { name: 'Início' }).click();
+    await page.getByRole('link', { name: 'wesleyplago' }).click();
     await expect(page).toHaveURL(/\/$/);
   });
 
@@ -41,7 +46,7 @@ test.describe('portfólio', () => {
   test('CSS do microfrontend não vaza para o portfólio', async ({ page }) => {
     // Mede o host antes e depois de o remote montar, na mesma página (navegação SPA).
     await page.goto('/');
-    await expect(page.getByRole('link', { name: 'RAG ao vivo' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Projetos' })).toBeVisible();
     const probe = () =>
       page.evaluate(() => {
         const nav = document.querySelector('.nav');
@@ -52,7 +57,7 @@ test.describe('portfólio', () => {
         };
       });
     const before = await probe();
-    await page.getByRole('link', { name: 'RAG ao vivo' }).click();
+    await openProject(page, 'rag-eval-harness');
     await expect(page.locator('.rag')).toBeVisible();
     expect(await probe()).toEqual(before);
   });

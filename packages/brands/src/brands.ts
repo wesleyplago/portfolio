@@ -23,9 +23,9 @@ export type Brand = {
   radius: { sm: string; md: string; lg: string };
 };
 
-const sans = (family: string) => `"${family}", ui-sans-serif, system-ui, sans-serif`;
+const sans = (family: string, ...alt: string[]) => [family, ...alt].map((f) => `"${f}"`).join(', ') + ', ui-sans-serif, system-ui, sans-serif';
 const serif = (family: string) => `"${family}", ui-serif, Georgia, serif`;
-const mono = (family: string) => `"${family}", ui-monospace, SFMono-Regular, Menlo, monospace`;
+const mono = (family: string, ...alt: string[]) => [family, ...alt].map((f) => `"${f}"`).join(', ') + ', ui-monospace, SFMono-Regular, Menlo, monospace';
 const systemMono = 'ui-monospace, SFMono-Regular, Menlo, monospace';
 
 const sharp = { sm: '2px', md: '4px', lg: '6px' };
@@ -44,7 +44,12 @@ export const brands: Record<BrandId, Brand> = {
       bg: '#0a0d14', surface: '#131824', ink: '#e9edf3', muted: '#97a1b5', border: '#252d3d',
       accent: '#7d8aff', onAccent: '#0a0d14', ok: '#5fd39a', warn: '#f2b94b', bad: '#ff8a8f',
     },
-    font: { display: sans('Host Grotesk'), text: sans('Host Grotesk'), mono: mono('JetBrains Mono') },
+    // Os pacotes @fontsource-variable declaram "Host Grotesk Variable" e "JetBrains Mono Variable".
+    font: {
+      display: sans('Host Grotesk Variable', 'Host Grotesk'),
+      text: sans('Host Grotesk Variable', 'Host Grotesk'),
+      mono: mono('JetBrains Mono Variable', 'JetBrains Mono'),
+    },
     radius: sharp,
   },
   payops: {

@@ -1,26 +1,15 @@
+/* Os valores vêm de --h-* (tokens.ts, marca "host"); os nomes abaixo são aliases usados pelo resto do CSS. */
 :root {
-  --bg: #fbfbfd;
-  --surface: #ffffff;
-  --text: #14161c;
-  --muted: #5c6475;
-  --border: #e4e7ee;
-  --accent: #2a5bd7;
-  --accent-strong: #2a5bd7; /* fundo com texto branco: 5,9:1 */
-  --accent-soft: #eaf0ff;
-  color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0d1017;
-    --surface: #141924;
-    --text: #e8ecf4;
-    --muted: #97a1b5;
-    --border: #252d3d;
-    --accent: #6f95ff;
-    --accent-strong: #3b63d9; /* #6f95ff com texto branco dá só 2,9:1 */
-    --accent-soft: #1b2440;
-    color-scheme: dark;
-  }
+  --bg: var(--h-bg);
+  --surface: var(--h-surface);
+  --text: var(--h-ink);
+  --muted: var(--h-muted);
+  --border: var(--h-border);
+  --accent: var(--h-accent);
+  --accent-strong: var(--h-accent);
+  --on-accent: var(--h-on-accent);
+  --accent-soft: color-mix(in srgb, var(--h-accent) 12%, var(--h-bg));
+  color-scheme: light dark;
 }
 
 * { box-sizing: border-box; }
@@ -28,11 +17,11 @@ html, body { margin: 0; }
 body {
   background: var(--bg);
   color: var(--text);
-  font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 16px/1.6 var(--h-font-text);
   -webkit-font-smoothing: antialiased;
 }
 a { color: var(--accent); }
-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9em; background: var(--accent-soft); padding: 1px 5px; border-radius: 5px; }
+code { font: inherit; font-family: var(--h-font-mono); font-size: .9em; background: var(--accent-soft); padding: 1px 5px; border-radius: var(--h-radius-sm); }
 h1, h2, h3 { letter-spacing: -0.02em; line-height: 1.2; margin: 0; }
 h1 { font-size: clamp(30px, 5vw, 46px); }
 h2 { font-size: 24px; margin-bottom: 20px; }
@@ -42,10 +31,26 @@ h3 { font-size: 19px; }
 
 .nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; gap: 16px; flex-wrap: wrap; }
 .nav-brand { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--text); text-decoration: none; }
-.nav-mark { width: 30px; height: 30px; border-radius: 8px; background: var(--accent-strong); color: white; display: grid; place-items: center; }
+.nav-mark { width: 30px; height: 30px; border-radius: var(--h-radius-md); background: var(--accent-strong); color: var(--on-accent); display: grid; place-items: center; }
 .nav-links { display: flex; gap: 18px; flex-wrap: wrap; }
 .nav-links a { color: var(--muted); text-decoration: none; font-size: 15px; }
-.nav-links a:hover, .nav-links a.active { color: var(--text); }
+.nav-links a:hover, .nav-links a.active, .menu-btn:hover { color: var(--text); }
+.nav-links { align-items: center; }
+
+.menu { position: relative; }
+.menu-btn { background: none; border: 0; padding: 0; font: inherit; font-size: 15px; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.menu-btn::after { content: ""; width: 6px; height: 6px; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg) translateY(-2px); }
+.menu-btn[aria-expanded="true"]::after { transform: rotate(-135deg); }
+.menu-list { position: absolute; top: calc(100% + 8px); left: 0; z-index: 10; min-width: 240px; margin: 0; padding: 6px; list-style: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--h-radius-md); display: grid; gap: 2px; }
+.menu-list[hidden] { display: none; }
+.menu-list a { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--h-radius-sm); color: var(--text); }
+.menu-list a:hover, .menu-list a.active { background: var(--bg); }
+.menu-mark { width: 12px; height: 12px; border-radius: var(--h-radius-sm); flex: none; }
+@media (max-width: 560px) {
+  .nav-links { width: 100%; }
+  .menu { width: 100%; }
+  .menu-list { position: static; margin-top: 8px; min-width: 0; }
+}
 
 .hero { padding: 56px 0 40px; max-width: 820px; }
 .eyebrow { color: var(--accent); font-weight: 600; font-size: 14px; margin: 0 0 10px; }
@@ -54,14 +59,14 @@ h3 { font-size: 19px; }
 .chips { list-style: none; padding: 0; margin: 28px 0 0; display: flex; gap: 8px; flex-wrap: wrap; }
 .chips li { border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; font-size: 13px; color: var(--muted); }
 
-.btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); text-decoration: none; font: inherit; font-size: 15px; font-weight: 500; cursor: pointer; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: var(--h-radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--text); text-decoration: none; font: inherit; font-size: 15px; font-weight: 500; cursor: pointer; }
 .btn:hover { border-color: var(--accent); }
-.btn.primary { background: var(--accent-strong); border-color: var(--accent-strong); color: white; }
+.btn.primary { background: var(--accent-strong); border-color: var(--accent-strong); color: var(--on-accent); }
 
 .section { padding: 32px 0 48px; }
 .projects { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; }
 @media (max-width: 420px) { .projects { grid-template-columns: 1fr; } }
-.project { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+.project { background: var(--surface); border: 1px solid var(--border); border-radius: var(--h-radius-md); padding: 24px; display: flex; flex-direction: column; gap: 14px; }
 .project p { margin: 0; color: var(--muted); }
 .project .tagline { color: var(--accent); font-size: 14px; margin-top: 4px; }
 .highlights { margin: 0; padding-left: 18px; font-size: 14px; display: grid; gap: 4px; }
@@ -88,7 +93,7 @@ h3 { font-size: 19px; }
 /* Página de projeto: capa na marca do app (variáveis --brand-* vêm inline do ProjectPage).
    A capa usa só as cores da marca: aplicar --brand-font faria o host baixar as fontes dos remotes (uma vez por @font-face duplicado). */
 .project-page { display: grid; gap: 28px; padding: 16px 0 48px; }
-.cover { background: var(--brand-bg); color: var(--brand-ink); border-radius: 16px; padding: clamp(24px, 5vw, 56px); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px; align-items: end; }
+.cover { background: var(--brand-bg); color: var(--brand-ink); border-radius: var(--h-radius-md); padding: clamp(24px, 5vw, 56px); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px; align-items: end; }
 .cover-tagline { color: var(--brand-muted); font-size: 18px; margin: 12px 0 0; max-width: 560px; }
 .cover-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
 .cover-btn { display: inline-flex; align-items: center; padding: 10px 18px; border-radius: 8px; border: 1px solid var(--brand-border); color: var(--brand-ink); text-decoration: none; font-weight: 600; font-size: 15px; }

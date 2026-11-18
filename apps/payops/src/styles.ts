@@ -31,7 +31,7 @@ ${tokensCss(brands.payops, '.payops', 'po')}
 .payops a:hover { text-decoration: underline; }
 .payops code, .payops .mono { font-family: var(--po-font-mono); font-variant-numeric: tabular-nums; font-size: 12px; }
 /* O host tem estilo global para <code>; o remote define o seu para não herdar cores de outro tema. */
-.payops code { background: var(--po-panel-2); color: var(--po-text); border: 1px solid var(--po-border); padding: 1px 5px; border-radius: 5px; }
+.payops code { background: var(--po-panel-2); color: var(--po-text); border: 1px solid var(--po-border); padding: 1px 5px; border-radius: var(--po-radius-sm); }
 
 .payops .po-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
 .payops .po-brand { display: flex; align-items: center; gap: 10px; }
@@ -47,8 +47,8 @@ ${tokensCss(brands.payops, '.payops', 'po')}
 .payops .po-card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 12px; }
 .payops .po-card.human { border-color: var(--po-warn); background: var(--po-panel); }
 
-.payops .po-tabs { display: flex; gap: 4px; background: var(--po-panel-2); padding: 4px; border-radius: 10px; margin-bottom: 14px; flex-wrap: wrap; }
-.payops .po-tab { flex: 1; border: 0; background: transparent; color: var(--po-muted); padding: 8px 10px; border-radius: 8px; cursor: pointer; font: inherit; white-space: nowrap; }
+.payops .po-tabs { display: flex; gap: 4px; background: var(--po-panel-2); padding: 4px; border-radius: var(--po-radius-md); margin-bottom: 14px; flex-wrap: wrap; }
+.payops .po-tab { flex: 1; border: 0; background: transparent; color: var(--po-muted); padding: 8px 10px; border-radius: var(--po-radius-sm); cursor: pointer; font: inherit; white-space: nowrap; }
 .payops .po-tab[aria-selected="true"] { background: var(--po-panel); color: var(--po-text); box-shadow: 0 1px 0 var(--po-border); }
 
 .payops form { display: flex; flex-direction: column; gap: 12px; }
@@ -56,16 +56,16 @@ ${tokensCss(brands.payops, '.payops', 'po')}
 @media (max-width: 560px) { .payops .po-row { grid-template-columns: 1fr; } }
 .payops label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--po-muted); }
 .payops input, .payops select, .payops textarea {
-  background: var(--po-bg); color: var(--po-text); border: 1px solid var(--po-border); border-radius: 8px;
+  background: var(--po-bg); color: var(--po-text); border: 1px solid var(--po-border); border-radius: var(--po-radius-sm);
   padding: 9px 11px; font: inherit; font-size: 14px; width: 100%;
 }
 .payops textarea { min-height: 110px; resize: vertical; }
-.payops input:focus-visible, .payops select:focus-visible, .payops textarea:focus-visible, .payops button:focus-visible, .payops a:focus-visible, .payops summary:focus-visible { outline: 2px solid var(--po-accent); outline-offset: 2px; }
+.payops :focus-visible { outline: 2px solid var(--po-accent); outline-offset: 2px; }
 .payops input:focus, .payops select:focus, .payops textarea:focus { border-color: var(--po-accent); }
 .payops .po-err { color: var(--po-bad); font-size: 12px; min-height: 0; }
 .payops .po-hint { color: var(--po-muted); font-size: 12px; }
 
-.payops .po-btn { border: 1px solid var(--po-border); background: var(--po-panel-2); color: var(--po-text); padding: 9px 14px; border-radius: 8px; cursor: pointer; font: inherit; font-weight: 500; }
+.payops .po-btn { border: 1px solid var(--po-border); background: var(--po-panel-2); color: var(--po-text); padding: 9px 14px; border-radius: var(--po-radius-sm); cursor: pointer; font: inherit; font-weight: 500; }
 .payops .po-btn:hover:not(:disabled) { border-color: var(--po-accent); }
 .payops .po-btn:disabled { opacity: .5; cursor: not-allowed; }
 .payops .po-btn.primary { background: var(--po-accent-strong); border-color: var(--po-accent-strong); color: var(--po-on-accent); }
@@ -83,7 +83,7 @@ ${tokensCss(brands.payops, '.payops', 'po')}
 .payops .po-empty { color: var(--po-muted); text-align: center; padding: 18px 8px; font-size: 13px; }
 .payops .po-list { display: flex; flex-direction: column; gap: 10px; }
 
-.payops .po-approval { border: 1px solid var(--po-warn); border-radius: 10px; padding: 12px; background: var(--po-bg); display: flex; flex-direction: column; gap: 8px; }
+.payops .po-approval { border: 1px solid var(--po-warn); border-radius: var(--po-radius-md); padding: 12px; background: var(--po-bg); display: flex; flex-direction: column; gap: 8px; }
 .payops .po-approval-amount { font-family: var(--po-font-mono); font-variant-numeric: tabular-nums; font-size: 20px; font-weight: 600; }
 .payops .po-kv { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; font-size: 12px; }
 .payops .po-kv dt { color: var(--po-muted); }
@@ -91,10 +91,10 @@ ${tokensCss(brands.payops, '.payops', 'po')}
 .payops .po-countdown { font-size: 12px; color: var(--po-warn); }
 
 .payops .po-balance { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.payops .po-balance-item { background: var(--po-panel-2); border-radius: 10px; padding: 10px 12px; }
+.payops .po-balance-item { background: var(--po-panel-2); border-radius: var(--po-radius-md); padding: 10px 12px; }
 .payops .po-balance-item b { display: block; font-family: var(--po-font-mono); font-variant-numeric: tabular-nums; font-size: 16px; margin-top: 2px; }
 
-.payops .po-entry { border: 1px solid var(--po-border); border-radius: 10px; padding: 12px; background: var(--po-panel-2); display: flex; flex-direction: column; gap: 8px; }
+.payops .po-entry { border: 1px solid var(--po-border); border-radius: var(--po-radius-md); padding: 12px; background: var(--po-panel-2); display: flex; flex-direction: column; gap: 8px; }
 .payops .po-entry-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
 .payops .po-chain { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; color: var(--po-muted); font-size: 12px; }
 .payops .po-answer { font-size: 13px; }
@@ -102,9 +102,9 @@ ${tokensCss(brands.payops, '.payops', 'po')}
 @keyframes po-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .payops .po-spinner { animation: none; } }
 .payops details summary { cursor: pointer; color: var(--po-muted); font-size: 12px; }
-.payops pre { background: var(--po-bg); border: 1px solid var(--po-border); border-radius: 8px; padding: 10px; overflow: auto; max-height: 240px; margin: 6px 0 0; font-size: 12px; }
+.payops pre { background: var(--po-bg); border: 1px solid var(--po-border); border-radius: var(--po-radius-sm); padding: 10px; overflow: auto; max-height: 240px; margin: 6px 0 0; font-size: 12px; }
 
-.payops .po-banner { border-radius: 10px; padding: 10px 12px; font-size: 13px; border: 1px solid; }
+.payops .po-banner { border-radius: var(--po-radius-md); padding: 10px 12px; font-size: 13px; border: 1px solid; }
 .payops .po-banner.bad { border-color: var(--po-bad); background: var(--po-panel-2); color: var(--po-bad); }
 .payops .po-banner.info { border-color: var(--po-border); background: var(--po-panel-2); color: var(--po-muted); }
 `;

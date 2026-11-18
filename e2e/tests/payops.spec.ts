@@ -19,6 +19,23 @@ test.describe('PayOps dentro do portfólio (modo demo)', () => {
     }
   });
 
+  test('marca clara com cantos e foco da própria marca, mesmo com o sistema escuro', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expect(payops.root).toHaveCSS('color-scheme', 'light');
+    await expect(payops.root.locator('.po-btn').first()).toHaveCSS('border-radius', '2px');
+    await expect(payops.root.locator('.po-tabs').first()).toHaveCSS('border-radius', '4px');
+    const ring = await payops.root.evaluate((root) => {
+      const el = document.createElement('div');
+      el.tabIndex = -1;
+      root.append(el);
+      el.focus();
+      const out = { visible: el.matches(':focus-visible'), color: getComputedStyle(el).outlineColor };
+      el.remove();
+      return out;
+    });
+    expect(ring).toEqual({ visible: true, color: 'rgb(13, 116, 128)' });
+  });
+
   test('formulário de cobrança valida antes de chamar o agente', async () => {
     const submit = payops.root.getByRole('button', { name: 'Pedir cobrança ao agente' });
 

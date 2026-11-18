@@ -48,7 +48,7 @@ ${scope} p { margin: 0; }
 ${scope} code { font-family: var(--lg-mono); font-size: 12px; background: var(--lg-lake-soft); color: var(--lg-ink); padding: 1px 5px; border-radius: var(--lg-radius-sm); }
 ${scope} button, ${scope} input, ${scope} select, ${scope} textarea { font: inherit; }
 ${scope} button { cursor: pointer; }
-${scope} button:focus-visible, ${scope} a:focus-visible, ${scope} input:focus-visible, ${scope} select:focus-visible { outline: 2px solid var(--lg-lake); outline-offset: 2px; }
+${scope} :focus-visible { outline: 2px solid var(--lg-accent); outline-offset: 2px; }
 ${scope} .lg-panel { background: var(--lg-surface); border: 1px solid var(--lg-line); border-radius: var(--lg-radius); padding: 16px; }
 ${scope} .lg-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
 ${scope} .lg-head h3 { font-size: 16px; }

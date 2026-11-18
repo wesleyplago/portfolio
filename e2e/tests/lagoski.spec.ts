@@ -80,7 +80,25 @@ test.describe('Lagoski (microfrontends + barramento simulado)', () => {
     await expect(page.locator('.lgk-inspector .lg-panel').first()).toHaveCSS('background-color', 'rgb(38, 28, 24)');
   });
 
-  test('fontes não são baixadas além do número de remotes que as declaram', async ({ page }) => {
+  test('controles nativos e foco seguem a marca de cada remote, não o host', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.goto('/projetos/lagoski');
+    await expect(page.locator('.lgk-catalog')).toHaveCSS('color-scheme', 'light');
+    await expect(page.locator('.lgk-inspector')).toHaveCSS('color-scheme', 'dark');
+    // Qualquer alvo de foco (inclusive scrollers como a lista de eventos) usa o destaque do Inspector.
+    const ring = await page.locator('.lgk-inspector').evaluate((root) => {
+      const el = document.createElement('div');
+      el.tabIndex = -1;
+      root.append(el);
+      el.focus();
+      const out = { visible: el.matches(':focus-visible'), color: getComputedStyle(el).outlineColor };
+      el.remove();
+      return out;
+    });
+    expect(ring).toEqual({ visible: true, color: 'rgb(168, 217, 138)' });
+  });
+
+  test('cada fonte da marca baixa uma vez só, da origem de um remote', async ({ page }) => {
     const woff: string[] = [];
     page.on('response', (r) => {
       if (/\.woff2(\?|$)/.test(r.url()) && r.ok()) woff.push(r.url());

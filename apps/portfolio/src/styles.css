@@ -165,7 +165,7 @@ h3 { font-size: 19px; }
 .cover { background: var(--brand-bg); color: var(--brand-ink); border-radius: var(--h-radius-md); padding: clamp(24px, 5vw, 56px); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px; align-items: end; }
 .cover-tagline { color: var(--brand-muted); font-size: 18px; margin: 12px 0 0; max-width: 560px; }
 .cover-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
-.cover-btn { display: inline-flex; align-items: center; padding: 10px 18px; border-radius: 8px; border: 1px solid var(--brand-border); color: var(--brand-ink); text-decoration: none; font-weight: 600; font-size: 15px; }
+.cover-btn { display: inline-flex; align-items: center; padding: 10px 18px; border-radius: var(--h-radius-sm); border: 1px solid var(--brand-border); color: var(--brand-ink); text-decoration: none; font-weight: 600; font-size: 15px; }
 .cover-btn:hover { border-color: var(--brand-accent); }
 .cover-btn.primary { background: var(--brand-accent); border-color: var(--brand-accent); color: var(--brand-on-accent); }
 .cover-btn.primary:hover { background: var(--brand-accent-hover); border-color: var(--brand-accent-hover); }

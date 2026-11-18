@@ -12,7 +12,8 @@
     "preview": "concurrently -k -n payops,rag,lg-catalog,lg-checkout,lg-orders,lg-inspector,vitrine,portfolio -c magenta,green,blue,blue,blue,blue,yellow,cyan \"pnpm --filter @portfolio/payops preview\" \"pnpm --filter @portfolio/rag preview\" \"pnpm --filter @portfolio/lagoski-catalog preview\" \"pnpm --filter @portfolio/lagoski-checkout preview\" \"pnpm --filter @portfolio/lagoski-orders preview\" \"pnpm --filter @portfolio/lagoski-inspector preview\" \"pnpm --filter @portfolio/vitrine preview\" \"pnpm --filter @portfolio/shell preview\"",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
-    "e2e": "pnpm --filter @portfolio/e2e e2e"
+    "e2e": "pnpm --filter @portfolio/e2e e2e",
+    "shots": "pnpm --filter @portfolio/e2e shots"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",

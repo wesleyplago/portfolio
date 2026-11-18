@@ -6,7 +6,7 @@ import { projects } from '../content/projects';
 // Carregado em runtime do app remoto (apps/rag). Nada do RAG entra no bundle do portfólio.
 const loadRag = () => import('rag/App');
 
-const project = projects.find((p) => p.slug === 'rag-eval-harness')!;
+const project = projects.find((p) => p.slug === 'rag')!;
 
 export function RagPage() {
   // React.lazy guarda uma falha de carregamento; um novo lazy por tentativa permite "Tentar de novo".

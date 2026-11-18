@@ -10,7 +10,7 @@ function useProject(): Project {
   return project;
 }
 
-/** Variáveis da marca do app, só neste subárvore. A fonte é a pilha da marca; sem a webfont (que mora no remote), cai no sistema. */
+/** Cores da marca do app, só nesta subárvore. A fonte continua a do host: a capa não baixa as fontes dos remotes. */
 function brandVars(project: Project): CSSProperties {
   const b = brands[project.brand];
   return {
@@ -21,7 +21,6 @@ function brandVars(project: Project): CSSProperties {
     '--brand-border': b.color.border,
     '--brand-accent': b.color.accent,
     '--brand-on-accent': b.color.onAccent,
-    '--brand-font': b.font.display,
   } as CSSProperties;
 }
 

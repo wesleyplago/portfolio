@@ -1,6 +1,7 @@
 import type { BrandId } from '@portfolio/brands';
 
 export type Project = {
+  /** Id da banda na home (/#slug); igual ao fim da rota da demo. */
   slug: string;
   name: string;
   tagline: string;
@@ -41,7 +42,7 @@ export const projects: Project[] = [
     shot: 'payops',
   },
   {
-    slug: 'rag-eval-harness',
+    slug: 'rag',
     name: 'rag-eval-harness',
     tagline: 'Bancada de avaliação de RAG sobre regulação de pagamentos',
     description:

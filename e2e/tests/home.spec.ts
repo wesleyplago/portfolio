@@ -16,11 +16,32 @@ test.describe('home', () => {
 
   test('reduced motion: colagem parada e sem botão de pausa', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
+    const jpgs: string[] = [];
+    page.on('request', (req) => {
+      const name = new URL(req.url()).pathname.split('/').pop()!;
+      if (name.endsWith('.jpg')) jpgs.push(name);
+    });
     await page.goto('/');
-    const first = await page.locator('.collage img').first().getAttribute('src');
+    const collage = page.locator('.collage');
+    await expect(collage).toHaveAttribute('data-set', '0');
     await page.waitForTimeout(3200);
-    expect(await page.locator('.collage img').first().getAttribute('src')).toBe(first);
+    await expect(collage).toHaveAttribute('data-set', '0');
+    await expect(page.locator('.collage-set').nth(0).locator('img')).toHaveCount(4);
+    await expect(page.locator('.collage-set img')).toHaveCount(4);
+    // O recorte do PayOps só existe nos conjuntos 1 a 3 (as bandas usam as capturas -frame).
+    expect(jpgs.filter((n) => n.startsWith('payops-crop'))).toEqual([]);
+    expect(jpgs.some((n) => n.startsWith('payops-frame'))).toBe(true);
     await expect(page.getByRole('button', { name: /Pausar/ })).toHaveCount(0);
+  });
+
+  test('colagem monta só o conjunto 0 e o próximo na primeira tela', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/', { waitUntil: 'load' });
+    const sets = page.locator('.collage-set');
+    await expect(sets.nth(0).locator('img')).toHaveCount(4);
+    await expect(sets.nth(1).locator('img')).toHaveCount(4);
+    await expect(sets.nth(2).locator('img')).toHaveCount(0);
+    await expect(sets.nth(3).locator('img')).toHaveCount(0);
   });
 
   test('colagem avança sozinha e o botão pausa e retoma', async ({ page }) => {

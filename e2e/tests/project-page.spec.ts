@@ -18,7 +18,7 @@ test.describe('página de projeto composta', () => {
   });
 
   test('com o remote fora do ar, a capa continua e o erro é legível', async ({ page }) => {
-    allowErrors(/.*/);
+    allowErrors(/remoteEntry|Federation Runtime|Failed to fetch dynamically imported module|ERR_FAILED|Failed to load resource/);
     await page.route(/payops.*remoteEntry\.js|:5281\//, (r) => r.abort());
     await page.goto('/projetos/payops');
     await expect(page.locator('.cover h1')).toHaveText('payops-agent');

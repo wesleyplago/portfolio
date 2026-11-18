@@ -5,7 +5,7 @@ import { PayOps } from '../tests/fixtures';
 
 /**
  * Gera as capturas estáticas usadas na home (apps em modo demo).
- * frame: 1280×800 a partir do topo do app; crop: 640×480 do mesmo ponto.
+ * frame: até 1280×800 e crop: até 640×480 a partir do canto superior esquerdo do root (nunca além dele).
  */
 const OUT = resolve(import.meta.dirname, '../../apps/portfolio/src/assets/shots');
 mkdirSync(OUT, { recursive: true });
@@ -18,7 +18,15 @@ async function capture(page: Page, root: Locator, name: string) {
   await page.waitForTimeout(600); // animações de entrada
   await root.evaluate((el) => el.scrollIntoView({ block: 'start' }));
   const box = (await root.boundingBox())!;
-  const clip = (w: number, h: number) => ({ x: 0, y: Math.max(0, Math.round(box.y)), width: w, height: h });
+  // Recorte limitado à caixa do root: nenhum pixel da página hospedeira entra na imagem.
+  const x = Math.ceil(box.x);
+  const y = Math.ceil(box.y);
+  const clip = (w: number, h: number) => ({
+    x,
+    y,
+    width: Math.min(w, Math.floor(box.x + box.width) - x),
+    height: Math.min(h, Math.floor(box.y + box.height) - y),
+  });
   const opts = { type: 'jpeg', quality: 75 } as const;
   await page.screenshot({ ...opts, path: `${OUT}/${name}-frame.jpg`, clip: clip(1280, 800) });
   await page.screenshot({ ...opts, path: `${OUT}/${name}-crop.jpg`, clip: clip(640, 480) });

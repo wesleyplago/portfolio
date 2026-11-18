@@ -87,6 +87,11 @@ test.describe('Lagoski (microfrontends + barramento simulado)', () => {
     });
     await new Lagoski(page).open();
     await expect.poll(() => page.evaluate(() => document.fonts.check('16px "Hanken Grotesk"'))).toBe(true);
+    // Fontes do host (Host Grotesk, JetBrains Mono) vêm da origem do host e ficam fora do limite por remote.
+    const hostOrigin = new URL(page.url()).origin;
+    const hostWoff = woff.filter((u) => new URL(u).origin === hostOrigin);
+    for (const u of hostWoff) expect(u, 'fonte da origem do host').toMatch(/host-grotesk|jetbrains-mono/);
+    woff.splice(0, woff.length, ...woff.filter((u) => new URL(u).origin !== hostOrigin));
     const family = (u: string) => /newsreader/.test(u) ? 'Newsreader' : /hanken/.test(u) ? 'Hanken Grotesk' : /jetbrains/.test(u) ? 'JetBrains Mono' : u;
     const counts: Record<string, number> = {};
     for (const u of woff) counts[family(u)] = (counts[family(u)] ?? 0) + 1;

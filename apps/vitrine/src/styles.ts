@@ -10,7 +10,6 @@ ${tokensCss(brands.vitrine, '.vt', 'vt')}
   /* Aliases dos nomes antigos, para não reescrever o CSS inteiro. */
   --vt-panel: var(--vt-surface);
   --vt-text: var(--vt-ink);
-  --vt-accent-strong: var(--vt-accent);
   --vt-accent-soft: color-mix(in srgb, var(--vt-accent) 8%, var(--vt-bg));
   --vt-ok-soft: color-mix(in srgb, var(--vt-ok) 14%, var(--vt-bg));
   /* cores das lojas: marcas de terceiros, ficam como estão */

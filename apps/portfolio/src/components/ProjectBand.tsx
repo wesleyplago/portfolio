@@ -1,28 +1,12 @@
-import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
-import { accentHover, brands } from '@portfolio/brands';
+import { brandVars } from '../brand-vars';
 import type { Project } from '../content/projects';
 import { frameAspect, frameShot } from '../content/shots';
-
-function bandVars(project: Project): CSSProperties {
-  const b = brands[project.brand];
-  return {
-    '--brand-bg': b.color.bg,
-    '--brand-surface': b.color.surface,
-    '--brand-ink': b.color.ink,
-    '--brand-muted': b.color.muted,
-    '--brand-border': b.color.border,
-    '--brand-accent': b.color.accent,
-    '--brand-on-accent': b.color.onAccent,
-    '--brand-accent-hover': accentHover(b.color.accent, b.color.onAccent),
-    '--brand-radius': b.radius.md,
-  } as CSSProperties;
-}
 
 /** Uma tela por projeto, nas cores da marca do app (a fonte é a do host: a home não baixa fontes dos apps). */
 export function ProjectBand({ project: p }: { project: Project }) {
   return (
-    <section id={p.slug} className="band" style={bandVars(p)} aria-labelledby={`${p.slug}-name`}>
+    <section id={p.slug} className="band" style={brandVars(p.brand)} aria-labelledby={`${p.slug}-name`}>
       <article className="project">
         <div className="band-text">
           <h2 id={`${p.slug}-name`} className="band-name">

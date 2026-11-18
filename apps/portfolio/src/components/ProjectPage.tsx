@@ -1,5 +1,5 @@
-import { createContext, use, type CSSProperties, type ReactNode } from 'react';
-import { accentHover, brands } from '@portfolio/brands';
+import { createContext, use, type ReactNode } from 'react';
+import { brandVars } from '../brand-vars';
 import type { Project } from '../content/projects';
 
 const ProjectContext = createContext<Project | null>(null);
@@ -10,21 +10,6 @@ function useProject(): Project {
   return project;
 }
 
-/** Cores da marca do app, só nesta subárvore. A fonte continua a do host: a capa não baixa as fontes dos remotes. */
-function brandVars(project: Project): CSSProperties {
-  const b = brands[project.brand];
-  return {
-    '--brand-bg': b.color.bg,
-    '--brand-surface': b.color.surface,
-    '--brand-ink': b.color.ink,
-    '--brand-muted': b.color.muted,
-    '--brand-border': b.color.border,
-    '--brand-accent': b.color.accent,
-    '--brand-on-accent': b.color.onAccent,
-    '--brand-accent-hover': accentHover(b.color.accent, b.color.onAccent),
-  } as CSSProperties;
-}
-
 /**
  * Página de projeto por composição: o consumidor escolhe e ordena as partes
  * (Cover, Guide, Demo, Inside) e todas leem o mesmo Project pelo contexto.
@@ -32,7 +17,7 @@ function brandVars(project: Project): CSSProperties {
 export function ProjectPage({ project, children }: { project: Project; children: ReactNode }) {
   return (
     <ProjectContext value={project}>
-      <article className="project-page" style={brandVars(project)}>
+      <article className="project-page" style={brandVars(project.brand)}>
         {children}
       </article>
     </ProjectContext>

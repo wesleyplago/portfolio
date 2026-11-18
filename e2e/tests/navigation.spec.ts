@@ -50,6 +50,17 @@ test.describe('navegação do portfólio', () => {
     await expect(btn).toBeFocused();
   });
 
+  test('skip link é o primeiro Tab e leva ao conteúdo', async ({ page }) => {
+    await page.goto('/projetos/payops');
+    const skip = page.getByRole('link', { name: 'Pular para o conteúdo' });
+    await expect(skip).toBeAttached();
+    await page.keyboard.press('Tab');
+    await expect(skip).toBeFocused();
+    await expect(skip).toBeInViewport();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('main')).toBeFocused();
+  });
+
   test('submenu fecha com clique fora', async ({ page }) => {
     await page.goto('/');
     const btn = page.getByRole('button', { name: 'Projetos' });
@@ -71,7 +82,7 @@ test.describe('navegação do portfólio', () => {
     await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(238, 240, 243)');
   });
 
-  test('CTA do topo e o card do projeto abrem a demo', async ({ page }) => {
+  test('"Ver os projetos" leva à banda do PayOps e "Abrir a demo" da banda abre a demo', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('link', { name: 'Ver os projetos' }).click();
     await expect(page).toHaveURL(/\/#payops$/);

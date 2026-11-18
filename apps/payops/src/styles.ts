@@ -100,6 +100,7 @@ ${tokensCss(brands.payops, '.payops', 'po')}
 .payops .po-answer { font-size: 13px; }
 .payops .po-spinner { width: 12px; height: 12px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: po-spin .8s linear infinite; display: inline-block; }
 @keyframes po-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .payops .po-spinner { animation: none; } }
 .payops details summary { cursor: pointer; color: var(--po-muted); font-size: 12px; }
 .payops pre { background: var(--po-bg); border: 1px solid var(--po-border); border-radius: 8px; padding: 10px; overflow: auto; max-height: 240px; margin: 6px 0 0; font-size: 12px; }
 

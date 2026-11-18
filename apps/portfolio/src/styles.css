@@ -27,9 +27,16 @@ h1 { font-size: clamp(30px, 5vw, 46px); }
 h2 { font-size: 24px; margin-bottom: 20px; }
 h3 { font-size: 19px; }
 
+/* Foco visível em todas as marcas: no host usa o destaque; nas bandas e capas, a tinta da marca do app. */
+:focus-visible { outline: 2px solid var(--focus-ring, var(--accent)); outline-offset: 3px; }
+.band, .cover { --focus-ring: var(--brand-ink); }
+.skip-link { position: absolute; left: 12px; top: -48px; z-index: 20; padding: 8px 14px; background: var(--accent); color: var(--on-accent); border-radius: var(--h-radius-sm); text-decoration: none; font-weight: 500; }
+.skip-link:focus { top: 12px; }
+
 .shell { max-width: 1280px; margin: 0 auto; padding: 0 20px; }
 
-.nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; gap: 16px; flex-wrap: wrap; }
+/* 72px de altura mínima, igual ao --nav-h do hero: o hero ocupa exatamente o resto da primeira tela. */
+.nav { display: flex; justify-content: space-between; align-items: center; min-height: 72px; padding: 12px 0; gap: 16px; flex-wrap: wrap; }
 .nav-brand { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--text); text-decoration: none; }
 .nav-mark { width: 30px; height: 30px; border-radius: var(--h-radius-md); background: var(--accent-strong); color: var(--on-accent); display: grid; place-items: center; }
 .nav-links { display: flex; gap: 18px; flex-wrap: wrap; }
@@ -93,24 +100,30 @@ h3 { font-size: 19px; }
 
 /* Banda de projeto: cores da marca do app (inline, --brand-*), fonte do host.
    O border-image estende o fundo até as bordas da janela sem criar rolagem horizontal. */
-.band { background-color: var(--brand-bg); border-image: linear-gradient(var(--brand-bg) 0 0) fill 0 // 0 100vw; color: var(--brand-ink); padding: clamp(56px, 9vw, 96px) 0; display: grid; align-content: center; }
-.band .project { display: grid; gap: 32px; align-items: center; }
+.band { background-color: var(--brand-bg); border-image: linear-gradient(var(--brand-bg) 0 0) fill 0 // 0 100vw; color: var(--brand-ink); padding: clamp(56px, 9vw, 96px) 0; display: grid; align-content: center; min-height: 100svh; }
+.band .project { display: grid; gap: 32px; align-items: start; }
 @media (min-width: 1024px) {
-  .band { min-height: 100svh; }
   .band .project { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 56px; }
 }
 .band-name { display: flex; align-items: center; gap: 12px; font-size: clamp(26px, 3vw, 34px); margin: 0; overflow-wrap: anywhere; }
 .band-logo { flex: none; width: 36px; height: 36px; display: grid; place-items: center; font-size: 18px; border-radius: var(--brand-radius); background: var(--brand-accent); color: var(--brand-on-accent); }
-.band-tagline { margin: 12px 0 0; color: var(--brand-muted); font-size: 18px; max-width: 40ch; }
+.band-tagline { margin: 12px 0 0; color: var(--brand-ink); font-size: 18px; max-width: 40ch; }
 .band-metric { margin: 40px 0 0; display: grid; gap: 8px; }
+.band-text { container-type: inline-size; }
 .band-metric strong { font-size: clamp(48px, 6.5vw, 96px); font-weight: 600; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; color: var(--brand-accent); overflow-wrap: anywhere; }
+@media (min-width: 1024px) {
+  /* A métrica fica numa linha só ("0,43 → 0,82"): o tamanho acompanha a largura da coluna. */
+  .band-metric strong { white-space: nowrap; font-size: clamp(40px, 15cqi, 96px); }
+}
 .band-metric span { color: var(--brand-muted); font-size: 15px; }
 .band-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
 .band a.btn { background: var(--brand-surface); border-color: var(--brand-border); color: var(--brand-ink); border-radius: var(--brand-radius); }
 .band a.btn:hover { background: var(--brand-border); border-color: var(--brand-border); }
 .band a.btn.primary { background: var(--brand-accent); border-color: var(--brand-accent); color: var(--brand-on-accent); }
-.band a.btn.primary:hover { background: color-mix(in srgb, var(--brand-accent) 85%, var(--brand-ink)); }
-.band a.btn:active { transform: translateY(1px); }
+.band a.btn.primary:hover { background: var(--brand-accent-hover); border-color: var(--brand-accent-hover); }
+@media (prefers-reduced-motion: no-preference) {
+  .band a.btn:active { transform: translateY(1px); }
+}
 .app-frame { overflow: hidden; border: 1px solid var(--brand-border); border-radius: var(--brand-radius); background: var(--brand-surface); }
 .app-frame img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
 @media (prefers-reduced-motion: no-preference) {
@@ -118,15 +131,15 @@ h3 { font-size: 19px; }
   .app-frame:hover img { transform: scale(1.02); }
 }
 
-.about { padding: clamp(64px, 10vw, 112px) 0 32px; }
-.about h2, .contact h2 { font-size: clamp(28px, 3.4vw, 44px); font-weight: 600; margin: 0 0 40px; }
+/* "Como eu trabalho" e contato: uma tela cada (spec 4.2). */
+.about, .contact { min-height: 100svh; display: grid; align-content: center; padding: clamp(64px, 10vw, 112px) 0; }
+.about h2, .contact h2 { font-size: clamp(26px, 2.4vw, 34px); font-weight: 600; margin: 0 0 40px; }
 .principles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 32px; }
 .principles li { border-top: 1px solid var(--border); padding-top: 16px; display: grid; gap: 8px; align-content: start; }
 .principles h3 { font-size: 19px; }
 .principles p { margin: 0; color: var(--muted); }
 .principles a { justify-self: start; font-weight: 500; text-underline-offset: 3px; }
 
-.contact { padding: clamp(64px, 10vw, 112px) 0; }
 .contact h2 { max-width: 20ch; text-wrap: balance; }
 .contact-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 
@@ -155,7 +168,7 @@ h3 { font-size: 19px; }
 .cover-btn { display: inline-flex; align-items: center; padding: 10px 18px; border-radius: 8px; border: 1px solid var(--brand-border); color: var(--brand-ink); text-decoration: none; font-weight: 600; font-size: 15px; }
 .cover-btn:hover { border-color: var(--brand-accent); }
 .cover-btn.primary { background: var(--brand-accent); border-color: var(--brand-accent); color: var(--brand-on-accent); }
-.cover-btn.primary:hover { filter: brightness(1.08); }
+.cover-btn.primary:hover { background: var(--brand-accent-hover); border-color: var(--brand-accent-hover); }
 .cover-metric { margin: 0; display: grid; gap: 6px; max-width: 260px; text-align: right; }
 .cover-metric strong { font-size: clamp(36px, 6vw, 64px); line-height: 1; letter-spacing: -0.03em; color: var(--brand-accent); }
 .cover-metric span { color: var(--brand-muted); font-size: 14px; }

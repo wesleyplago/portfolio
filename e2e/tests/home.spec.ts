@@ -45,7 +45,10 @@ test.describe('home', () => {
     await page.goto('/');
     await expect(page.locator('#payops').getByRole('link', { name: 'Ver o código ↗' })).toBeVisible();
     await expect(page.locator('#vitrine').getByRole('link', { name: /Ver o código/ })).toHaveCount(0);
-    await expect(page.locator('#vitrine .app-frame img')).toBeVisible();
+    const shot = page.locator('#vitrine .app-frame img');
+    await shot.scrollIntoViewIfNeeded();
+    await expect(shot).toBeVisible();
+    await expect.poll(() => shot.evaluate((img: HTMLImageElement) => (img.complete ? img.naturalWidth : 0))).toBeGreaterThan(0);
   });
 
   test('hero leva aos projetos; sobre e contato existem', async ({ page }) => {

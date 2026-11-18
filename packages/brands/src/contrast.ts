@@ -26,3 +26,14 @@ export function hue(hex: string): number {
   const h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
   return (h * 60 + 360) % 360;
 }
+
+/**
+ * Cor de hover do botão primário: o destaque misturado 20% com preto ou branco,
+ * para o lado que afasta do texto (onAccent). Muda visivelmente em toda marca,
+ * inclusive quando accent == ink (Vitrine), e o contraste com o texto só sobe.
+ */
+export function accentHover(accent: string, onAccent: string): string {
+  const toward = contrast(onAccent, '#000000') > contrast(onAccent, '#ffffff') ? 0 : 1;
+  const hex = (c: number) => Math.round((c * 0.8 + toward * 0.2) * 255).toString(16).padStart(2, '0');
+  return `#${rgb(accent).map(hex).join('')}`;
+}

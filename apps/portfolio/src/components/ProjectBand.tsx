@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
-import { brands } from '@portfolio/brands';
+import { accentHover, brands } from '@portfolio/brands';
 import type { Project } from '../content/projects';
 import { frameAspect, frameShot } from '../content/shots';
 
@@ -14,6 +14,7 @@ function bandVars(project: Project): CSSProperties {
     '--brand-border': b.color.border,
     '--brand-accent': b.color.accent,
     '--brand-on-accent': b.color.onAccent,
+    '--brand-accent-hover': accentHover(b.color.accent, b.color.onAccent),
     '--brand-radius': b.radius.md,
   } as CSSProperties;
 }

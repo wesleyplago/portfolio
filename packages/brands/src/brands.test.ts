@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { brands, contrast, hue, type Palette } from './index';
+import { accentHover, brands, contrast, hue, type Palette } from './index';
 
 const roles = ['ink', 'muted', 'accent', 'ok', 'warn', 'bad'] as const;
 
@@ -22,6 +22,11 @@ for (const b of Object.values(brands)) {
           }
         }
         expect(contrast(p.onAccent, p.accent)).toBeGreaterThanOrEqual(4.5);
+      });
+      test('hover do botão primário muda a cor e mantém AA', () => {
+        const hover = accentHover(p.accent, p.onAccent);
+        expect(hover).not.toBe(p.accent);
+        expect(contrast(p.onAccent, hover)).toBeGreaterThanOrEqual(contrast(p.onAccent, p.accent));
       });
       test('nada de violeta', () => {
         for (const v of Object.values(p)) {

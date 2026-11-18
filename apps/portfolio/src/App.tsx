@@ -1,4 +1,4 @@
-import { NavLink, Route, Routes } from 'react-router-dom';
+import { Navigate, NavLink, Route, Routes } from 'react-router-dom';
 import { profile } from './content/profile';
 import { ProjectsMenu } from './components/ProjectsMenu';
 import { Home } from './pages/Home';
@@ -11,6 +11,9 @@ import { NotFound } from './pages/NotFound';
 export default function App() {
   return (
     <div className="shell">
+      <a href="#conteudo" className="skip-link">
+        Pular para o conteúdo
+      </a>
       <header className="nav">
         <NavLink to="/" className="nav-brand">
           <span className="nav-mark" aria-hidden="true">{profile.name.charAt(0)}</span>
@@ -27,9 +30,11 @@ export default function App() {
           ))}
         </nav>
       </header>
-      <main>
+      <main id="conteudo" tabIndex={-1}>
         <Routes>
           <Route path="/" element={<Home />} />
+          {/* Servidor estático que abre o arquivo pelo nome (…/index.html) cai na home, não no 404. */}
+          <Route path="/index.html" element={<Navigate to="/" replace />} />
           <Route path="/projetos/payops" element={<PayOpsPage />} />
           <Route path="/projetos/rag" element={<RagPage />} />
           <Route path="/projetos/vitrine" element={<VitrinePage />} />

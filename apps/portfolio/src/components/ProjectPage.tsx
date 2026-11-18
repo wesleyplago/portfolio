@@ -1,5 +1,5 @@
 import { createContext, use, type CSSProperties, type ReactNode } from 'react';
-import { brands } from '@portfolio/brands';
+import { accentHover, brands } from '@portfolio/brands';
 import type { Project } from '../content/projects';
 
 const ProjectContext = createContext<Project | null>(null);
@@ -21,6 +21,7 @@ function brandVars(project: Project): CSSProperties {
     '--brand-border': b.color.border,
     '--brand-accent': b.color.accent,
     '--brand-on-accent': b.color.onAccent,
+    '--brand-accent-hover': accentHover(b.color.accent, b.color.onAccent),
   } as CSSProperties;
 }
 
@@ -69,7 +70,7 @@ function Cover({ children }: { children?: ReactNode }) {
 function Guide() {
   const { guide } = useProject();
   return (
-    <ol className="guide">
+    <ol className="guide" aria-label="Como testar">
       {guide.map((step) => (
         <li key={step}>{step}</li>
       ))}

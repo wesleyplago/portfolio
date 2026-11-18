@@ -6,7 +6,7 @@ import {
   CANCEL_LABEL,
   emitBrowser,
   LagoskiApiError,
-  lagoskiFonts,
+  registerLagoskiFonts,
   lagoskiTokens,
   onBrowser,
   session,
@@ -22,11 +22,9 @@ import {
 } from '@portfolio/lagoski-contracts';
 import { useBusEvents, useLagoski } from './useLagoski';
 
-const abs = (url: string) => new URL(url, import.meta.url).href;
-const fonts = lagoskiFonts({ display: abs(newsreaderUrl), text: abs(hankenUrl) });
+registerLagoskiFonts({ display: newsreaderUrl, text: hankenUrl });
 
 const css =
-  fonts +
   lagoskiTokens('.lgk-checkout') +
   `
 .lgk-checkout .ck-items { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }

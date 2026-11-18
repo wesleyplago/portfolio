@@ -6,7 +6,7 @@ import {
   emitBrowser,
   ensureCart,
   LagoskiApiError,
-  lagoskiFonts,
+  registerLagoskiFonts,
   lagoskiTokens,
   type LagoskiClient,
   type ObservedEvent,
@@ -16,11 +16,9 @@ import {
 import { TeeArt } from './TeeArt';
 import { useBusEvents, useLagoski } from './useLagoski';
 
-const abs = (url: string) => new URL(url, import.meta.url).href;
-const fonts = lagoskiFonts({ display: abs(newsreaderUrl), text: abs(hankenUrl) });
+registerLagoskiFonts({ display: newsreaderUrl, text: hankenUrl });
 
 const css =
-  fonts +
   lagoskiTokens('.lgk-catalog') +
   `
 .lgk-catalog .lc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }

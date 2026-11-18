@@ -4,7 +4,7 @@ export * from './runtime';
 export * from './bus';
 export * from './format';
 export { lagoskiTokens, type LagoskiVariant } from './theme';
-export { lagoskiFonts } from './fonts';
+export { registerLagoskiFonts } from './fonts';
 export { createMockLagoskiClient, type MockSystemOptions } from './mock/system';
 export { TEST_CARDS, type Simulator } from './mock/simulator';
 export type { SubscriptionStats } from './mock/broker';

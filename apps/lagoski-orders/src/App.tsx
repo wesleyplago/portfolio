@@ -5,7 +5,7 @@ import {
   brl,
   CANCEL_LABEL,
   emitBrowser,
-  lagoskiFonts,
+  registerLagoskiFonts,
   lagoskiTokens,
   onBrowser,
   session,
@@ -18,11 +18,9 @@ import {
 } from '@portfolio/lagoski-contracts';
 import { useBusEvents, useLagoski } from './useLagoski';
 
-const abs = (url: string) => new URL(url, import.meta.url).href;
-const fonts = lagoskiFonts({ display: abs(newsreaderUrl), text: abs(hankenUrl) });
+registerLagoskiFonts({ display: newsreaderUrl, text: hankenUrl });
 
 const css =
-  fonts +
   lagoskiTokens('.lgk-orders') +
   `
 .lgk-orders .lo-cols { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; }

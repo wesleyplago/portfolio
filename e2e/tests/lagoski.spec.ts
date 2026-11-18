@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import type { Locator, Page } from '@playwright/test';
 import { allowErrors, expect, test } from './fixtures';
+import { LAGOSKI } from '../playwright.config';
 
 /**
  * Jornadas do Lagoski em modo demo: os quatro microfrontends sobem sem BFF e
@@ -104,21 +105,31 @@ test.describe('Lagoski (microfrontends + barramento simulado)', () => {
       if (/\.woff2(\?|$)/.test(r.url()) && r.ok()) woff.push(r.url());
     });
     await new Lagoski(page).open();
-    await expect.poll(() => page.evaluate(() => document.fonts.check('16px "Hanken Grotesk"'))).toBe(true);
-    // Fontes do host (Host Grotesk, JetBrains Mono) vêm da origem do host e ficam fora do limite por remote.
+    // Espera as três famílias da marca carregarem antes de contar.
+    const loaded = () =>
+      page.evaluate(async () => {
+        await document.fonts.ready;
+        const out: string[] = [];
+        document.fonts.forEach((f) => {
+          if (f.status === 'loaded') out.push(`${f.family.replace(/"/g, '')}|${f.weight}`);
+        });
+        return out;
+      });
+    await expect.poll(loaded, { timeout: 15_000 }).toEqual(
+      expect.arrayContaining(['Newsreader|600', 'Hanken Grotesk|100 900', 'JetBrains Mono|400']),
+    );
+    // Fontes do host (Host Grotesk, JetBrains Mono variável) vêm da origem do host e ficam fora da conta.
     const hostOrigin = new URL(page.url()).origin;
-    const hostWoff = woff.filter((u) => new URL(u).origin === hostOrigin);
-    for (const u of hostWoff) expect(u, 'fonte da origem do host').toMatch(/host-grotesk|jetbrains-mono/);
-    woff.splice(0, woff.length, ...woff.filter((u) => new URL(u).origin !== hostOrigin));
+    for (const u of woff.filter((u) => new URL(u).origin === hostOrigin)) expect(u, 'fonte da origem do host').toMatch(/host-grotesk|jetbrains-mono/);
+    const remote = woff.filter((u) => new URL(u).origin !== hostOrigin);
+    const remoteOrigins = Object.values(LAGOSKI).map((port) => `http://localhost:${port}`);
+    for (const u of remote) expect(remoteOrigins, u).toContain(new URL(u).origin);
     const family = (u: string) => /newsreader/.test(u) ? 'Newsreader' : /hanken/.test(u) ? 'Hanken Grotesk' : /jetbrains/.test(u) ? 'JetBrains Mono' : u;
     const counts: Record<string, number> = {};
-    for (const u of woff) counts[family(u)] = (counts[family(u)] ?? 0) + 1;
-    console.log('woff2 por família:', JSON.stringify(counts), woff.map((u) => u.replace(/^https?:\/\//, '')));
-    // Cada remote injeta o próprio @font-face (URL de origem diferente), então o Hanken, comum aos quatro,
-    // baixa uma vez por remote. Newsreader (3 remotes) e JetBrains Mono (1) saem uma vez. Guarda contra piora.
-    const max: Record<string, number> = { Newsreader: 1, 'Hanken Grotesk': 4, 'JetBrains Mono': 1 };
-    for (const [name, n] of Object.entries(counts)) expect(n, `downloads de ${name}`).toBeLessThanOrEqual(max[name] ?? 0);
-    if ((counts['Hanken Grotesk'] ?? 0) > 1) test.info().annotations.push({ type: 'duplicado', description: `Hanken Grotesk x${counts['Hanken Grotesk']}` });
+    for (const u of remote) counts[family(u)] = (counts[family(u)] ?? 0) + 1;
+    console.log('woff2 por família:', JSON.stringify(counts), remote.map((u) => u.replace(/^https?:\/\//, '')));
+    // As faces são registradas pela API FontFace uma vez por documento, então cada arquivo sai uma vez.
+    expect(counts).toEqual({ Newsreader: 1, 'Hanken Grotesk': 1, 'JetBrains Mono': 1 });
   });
 
   test('caminho feliz: compra paga com 4242 vai até a entrega, com saga no Inspector e e-mails', async ({ page }) => {

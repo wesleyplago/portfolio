@@ -3,7 +3,7 @@ import jetbrainsUrl from '@fontsource/jetbrains-mono/files/jetbrains-mono-latin-
 import { useCallback, useEffect, useState } from 'react';
 import {
   contextOf,
-  lagoskiFonts,
+  registerLagoskiFonts,
   lagoskiTokens,
   onBrowser,
   session,
@@ -17,11 +17,9 @@ import {
 } from '@portfolio/lagoski-contracts';
 import { useBusEvents, useLagoski } from './useLagoski';
 
-const abs = (url: string) => new URL(url, import.meta.url).href;
-const fonts = lagoskiFonts({ text: abs(hankenUrl), mono: abs(jetbrainsUrl) });
+registerLagoskiFonts({ text: hankenUrl, mono: jetbrainsUrl });
 
 const css =
-  fonts +
   lagoskiTokens('.lgk-inspector', 'inspector') +
   `
 .lgk-inspector .li-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; font-size: 13px; }

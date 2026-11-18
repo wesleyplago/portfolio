@@ -42,6 +42,11 @@ describe('lagoskiTokens', () => {
 
   test('inspector é escuro', () => expect(lagoskiTokens('.x', 'inspector')).toContain('--lg-bg:#1c1411'));
 
+  test('color-scheme: shop claro, inspector escuro', () => {
+    expect(lagoskiTokens('.x')).toContain('color-scheme:light');
+    expect(lagoskiTokens('.x', 'inspector')).toContain('color-scheme:dark');
+  });
+
   test('sem bloco prefers-color-scheme', () => {
     expect(lagoskiTokens('.x')).not.toContain('prefers-color-scheme');
     expect(lagoskiTokens('.x', 'inspector')).not.toContain('prefers-color-scheme');

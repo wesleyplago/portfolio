@@ -11,6 +11,16 @@ test('tokensCss gera variáveis com prefixo sob o escopo', () => {
   expect(css).not.toContain('prefers-color-scheme');
 });
 
+test('tokensCss declara color-scheme conforme o modo da marca', () => {
+  expect(tokensCss(brands.payops, '.payops', 'po')).toContain('.payops{color-scheme:light;');
+  expect(tokensCss(brands.rag, '.rag', 'rg')).toContain('.rag{color-scheme:dark;');
+  expect(tokensCss(brands.lagoski, '.lgk', 'lg')).toContain('.lgk{color-scheme:light;');
+  expect(tokensCss(brands['lagoski-inspector'], '.lgk', 'lg')).toContain('.lgk{color-scheme:dark;');
+  const host = tokensCss(brands.host, ':root', 'h');
+  expect(host).toContain(':root{color-scheme:light;');
+  expect(host).toContain('@media (prefers-color-scheme: dark){:root{color-scheme:dark;');
+});
+
 test('tokensCss inclui bloco escuro só quando brand.dark existe', () => {
   const css = tokensCss(brands.host, ':root', 'h');
   expect(css).toContain('@media (prefers-color-scheme: dark)');

@@ -7,8 +7,9 @@ const colorVars: [keyof Palette, string][] = [
   ['accent', 'accent'], ['onAccent', 'on-accent'], ['ok', 'ok'], ['warn', 'warn'], ['bad', 'bad'],
 ];
 
-function block(brand: Brand, palette: Palette, scope: string, p: string): string {
+function block(brand: Brand, palette: Palette, scope: string, p: string, mode: Brand['mode']): string {
   const vars = [
+    `color-scheme:${mode}`,
     ...colorVars.map(([key, name]) => `--${p}-${name}:${palette[key]}`),
     `--${p}-font-display:${brand.font.display}`,
     `--${p}-font-text:${brand.font.text}`,
@@ -21,9 +22,9 @@ function block(brand: Brand, palette: Palette, scope: string, p: string): string
 }
 
 export function tokensCss(brand: Brand, scope: string, prefix: string): string {
-  const base = block(brand, brand.color, scope, prefix);
+  const base = block(brand, brand.color, scope, prefix, brand.mode);
   if (!brand.dark) return base;
-  return `${base}@media (prefers-color-scheme: dark){${block(brand, brand.dark, scope, prefix)}}`;
+  return `${base}@media (prefers-color-scheme: dark){${block(brand, brand.dark, scope, prefix, 'dark')}}`;
 }
 
 export function fontFaceCss(faces: FontFace[]): string {
